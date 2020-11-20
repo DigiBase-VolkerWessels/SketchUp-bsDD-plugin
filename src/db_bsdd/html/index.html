@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Select bsDD classification</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="../css/dialog.css">
+  <script type="text/javascript" src="../js/jquery.min.js"></script>
+  <script type="text/javascript" src="../js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="../js/bsdd_api.js"></script>
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div id="filters" class="col-12">
+      <h1 id="header"> </h1>
+      <div class="form-group row">
+        <label for="inputDomain" class="col-sm-3 col-form-label">Domain filter:</label>
+        <div class="col-sm-9">
+          <select class="form-control" id="inputDomain">
+            <option value="">-</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="inputIfc" class="col-sm-3 col-form-label">Related IFC entity:</label>
+        <div class="col-sm-9">
+          <select class="form-control" id="inputIfc">
+            <option value="">-</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="inputLanguage" class="col-sm-3 col-form-label">Language filter:</label>
+        <div class="col-sm-9">
+          <select class="form-control" id="inputLanguage">
+            <option value="">-</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="inputSearch" class="col-sm-3 col-form-label">Search:</label>
+        <div class="col-sm-9">
+          <input type="text" class="form-control" id="inputSearch" placeholder="Enter free search query">
+        </div>
+      </div>
+      <br>
+    </div>
+    <div class="row" id="results">
+      <div class="col-sm" id="classifications">
+        <table id="classificationTable" class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Domain</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+      <div class="col-sm" id="properties">
+        <table id="propertiesTable" class="table table-hover">
+          <thead>
+            <tr>
+              <th scope="col">Property</th>
+              <th scope="col">Value</th>
+              <th scope="col">Domain</th>
+            </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script>
+
+    function setIfcValue(valueToSelect) {
+      $('#inputIfc').val(valueToSelect);
+    }
+
+    function updateContent() {
+      var activeIfc = $('#inputIfc').val();
+      if (activeIfc == '-') {
+        activeIfc = "";
+      }
+      var activeLanguage = $('#inputLanguage').val();
+      if (activeLanguage == '-') {
+        activeLanguage = "";
+      }
+      activeDomain = $('#inputDomain').val();
+      if (activeDomain != '-') {
+        apiCall('api/SearchListOpen', function (response) {
+          var content = ''
+          $.each(response.domains, function (i, domain) {
+            $.each(domain.classifications, function (i, classification) {
+              content = content + '<tr id="' + classification.guid + '"><td>' + classification.name + '</td><td>' + domain.name + '</td></tr>'
+            });
+          });
+          content = content + ''
+          $('#classificationTable tbody').html(content);
+        }, {
+          'DomainGuid': activeDomain,
+          'RelatedIfcEntity': activeIfc,
+          'LanguageCode': activeLanguage,
+          'SearchText': $('#inputSearch').val()
+        });
+      }
+    }
+    fillSelectOptions();
+
+    // Search
+    $("#inputSearch").on('change keydown paste input clear', function () {
+      updateContent();
+    });
+    $("#inputIfc").on('change', function () {
+      updateContent();
+    });
+    $("#inputDomain").on('change', function () {
+      updateContent();
+    });
+    $("#inputLanguage").on('change', function () {
+      updateContent();
+    });
+
+
+    // Select
+    $(document).on("click", "tr", function () {
+      $('tr').removeAttr('class');
+      $(this).toggleClass("selected");
+
+      console.log($(this).attr('id'));
+      var classificationGuid = $(this).attr('id');
+      apiCall('api/Classification', function (classification) {
+        console.log(classification);
+        activeDomain = $("#inputDomain").find(':selected').text();
+        var properties = classification.classificationProperties;
+        var content = ''
+        $.each(properties, function (i, property) {
+          if (property.hasOwnProperty('predefinedValue')) {
+            predefinedValue = property.predefinedValue
+          } else {
+            predefinedValue = ""
+          }
+          if (property.hasOwnProperty('propertyDomainName')) {
+            propertyDomainName = property.propertyDomainName
+          } else {
+            propertyDomainName = ""
+          }
+          content = content + '<tr id="' + property.propertyGuid + '"><td>' + property.name + '</td><td>' + predefinedValue + '</td><td>' + propertyDomainName + '</td></tr>'
+        });
+        content = content + ''
+        $('#propertiesTable tbody').html(content);
+        sketchup.set_classification(classification.name, activeDomain, properties);
+      }, {
+        'classificationGuid': classificationGuid
+      });
+    });
+  </script>
+</body>
+</html>
