@@ -33,7 +33,7 @@ module DigiBase
     unless file_loaded?(__FILE__)
 
       # Version and release information.
-      VERSION = '1.0.0'.freeze
+      VERSION = '1.0.1'.freeze
 
       # load plugin only if SketchUp version is PRO
       if Sketchup.is_pro? && Sketchup.version_number>1600000000

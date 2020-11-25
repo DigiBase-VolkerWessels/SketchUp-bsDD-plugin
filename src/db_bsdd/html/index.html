@@ -93,17 +93,17 @@
       }
       activeDomain = $('#inputDomain').val();
       if (activeDomain != '-') {
-        apiCall('api/SearchListOpen', function (response) {
+        apiCall('api/SearchListOpen/v2', function (response) {
           var content = ''
           $.each(response.domains, function (i, domain) {
             $.each(domain.classifications, function (i, classification) {
-              content = content + '<tr id="' + classification.guid + '"><td>' + classification.name + '</td><td>' + domain.name + '</td></tr>'
+              content = content + '<tr id="' + classification.namespaceUri + '"><td>' + classification.name + '</td><td>' + domain.name + '</td></tr>'
             });
           });
           content = content + ''
           $('#classificationTable tbody').html(content);
         }, {
-          'DomainGuid': activeDomain,
+          'DomainNamespaceUri': activeDomain,
           'RelatedIfcEntity': activeIfc,
           'LanguageCode': activeLanguage,
           'SearchText': $('#inputSearch').val()
@@ -131,11 +131,8 @@
     $(document).on("click", "tr", function () {
       $('tr').removeAttr('class');
       $(this).toggleClass("selected");
-
-      console.log($(this).attr('id'));
-      var classificationGuid = $(this).attr('id');
-      apiCall('api/Classification', function (classification) {
-        console.log(classification);
+      var namespaceUri = $(this).attr('id');
+      apiCall('api/Classification/v2', function (classification) {
         activeDomain = $("#inputDomain").find(':selected').text();
         var properties = classification.classificationProperties;
         var content = ''
@@ -156,7 +153,7 @@
         $('#propertiesTable tbody').html(content);
         sketchup.set_classification(classification.name, activeDomain, properties);
       }, {
-        'classificationGuid': classificationGuid
+        'namespaceUri': namespaceUri
       });
     });
   </script>

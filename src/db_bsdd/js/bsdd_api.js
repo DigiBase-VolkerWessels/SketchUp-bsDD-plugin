@@ -2,7 +2,6 @@ var base_url = "https://bs-dd-api-prototype.azurewebsites.net/";
 
 function apiCall(endpoint, callback, params) {
   var url = base_url + endpoint + "?" + $.param(params, true);
-  console.log(url);
   var response = null;
   $.getJSON(url, function (result) {
     callback(result);
@@ -12,15 +11,15 @@ function apiCall(endpoint, callback, params) {
 
 // Set options for domain filter
 function setDomainList() {
-  apiCall('api/Domain', function (result) {
+  apiCall('api/Domain/v2', function (result) {
     $.each(result, function (i, item) {
 
       // When IFC domain guid is found start collecting IFC list
       if (item.name == 'IFC') {
-        setIfcList(item.guid);
+        setIfcList(item.namespaceUri);
       }
       $('#inputDomain').append($('<option>', {
-        value: item.guid,
+        value: item.namespaceUri,
         text: item.name
       }));
     });
@@ -39,8 +38,8 @@ function setLanguageList() {
 }
 
 // get selected ifc type from sketchup
-function setIfcList(ifcDomainGuid) {
-  apiCall('api/SearchListOpen', function (response) {
+function setIfcList(namespaceUri) {
+  apiCall('api/SearchListOpen/v2', function (response) {
     ifcDomain = response.domains[0];
     classifications = ifcDomain.classifications
     $.each(classifications, function (i, entity) {
@@ -53,7 +52,7 @@ function setIfcList(ifcDomainGuid) {
       sketchup.update();
     }
   }, {
-    'DomainGuid': ifcDomainGuid
+    'DomainNamespaceUri': namespaceUri
   });
 }
 

@@ -72,8 +72,11 @@ module DigiBase
           end
           if File.file?(file)
             classifications.load_schema(file) if !file.nil?
+            message = "Classification loaded:\r\n'#{domain}'"
+            puts message
           else
             message = "Unable to load classification:\r\n'#{domain}'"
+            puts message
             notification = UI::Notification.new(BsDD_EXTENSION, message)
             notification.show
           end
@@ -152,7 +155,7 @@ module DigiBase
           result["domains"].each do |domain|
             if domain["classifications"]
               domain["classifications"].each do |search_results|
-                search_list[search_results["classificationGuid"]] = search_results["name"]
+                search_list[search_results["namespaceUri"]] = search_results["name"]
               end
             end
           end
