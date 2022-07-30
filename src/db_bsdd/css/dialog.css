@@ -1,58 +1,88 @@
-html,body {
+html {
   font-family: Tahoma, Verdana, Arial, Helvetica, sans-serif;
   font-size: 10px;
   line-height: 1.5;
-  height: 100%;
 }
-
 body {
   background-color: #f0f0f0;
+  padding: 0.5rem;
 }
-
-h1 {
+html, body, form, #main {
+  height: 100%;
+}
+h1, h2, h3, h4 {
   font-size: 1rem;
   line-height: 1.5rem;
   font-weight: bold;
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
-
-.container-fluid {
-  height: 100%;
-  max-height: 100%;
-  display: flex;
-  flex-direction: column;
+.row img {
+  height: 18px;
+  margin: auto 0;
+  margin-right: 0.5rem;
+  margin-left: 0.5rem;
+}
+.row h1 {
+  margin-right: auto;
+  margin-left: 15px;
+}
+.title {
+  width: auto !important;
+  margin-left: 0.5rem !important;
+}
+.btn_properties{
+  margin: auto 0;
+  border: 1px solid #ced4da !important;
+  border-radius: .25rem;
+  height: initial !important;
+}
+.header {
+  border-bottom: 1px solid #ced4da !important;
+  margin-bottom: 0.5rem;;
+}
+.section  {
+  padding-right: 1.1rem;
+}
+.card, .card-body{
+  border-width: 0;
+  background-color: transparent;
+  margin: 0;
+  padding: 0;
+}
+input {
+  vertical-align: middle;
+  padding: 2rem;
+}
+input[type="checkbox"]{
+  height: 1.5em !important;
+  width: 1.5em !important;
+  margin-left: 0;
+  margin-right: 0.5em;
+}
+.highlight {
+  outline: 2px solid #497cab !important;
+  /* background-color: #b4d5fe; */
+  padding: 2px;
+}
+#main{
+  overflow-y: scroll !important;
+  overflow-x: hidden !important;
+}
+#footer{
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+  overflow: hidden;
 }
 
-#results {
-  flex: 1;
-  min-height: 0;
+#header{
+  padding-top: 1rem;
+  height:16%;
+  overflow: hidden;
 }
-
-#classifications {
-  display: flex;
-  flex-direction: column;
-  max-height: 100%;
-  flex: 1;
-  overflow-y: scroll;
-}
-
-#filters {
-  flex: 0;
-}
-
-#properties {
-  display: flex;
-  flex-direction: column;
-  max-height: 100%;
-  flex: 1;
-  overflow-y: auto;
-  background-image: url('../images/DigiBase.svg');
-  background-position: right bottom;
-  background-repeat: no-repeat;
-  background-size: 20em;
-}
-.selected
-{
-  background-color: #fe3917;
+label{
+  height: 2rem;
+  padding: 0;
+  padding-right: 0 !important;
+  margin-bottom: 0;
 }

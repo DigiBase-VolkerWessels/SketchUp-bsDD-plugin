@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # db_bsdd.rb
 
 # Copyright (c) 2020 DigiBase B.V.
@@ -29,7 +31,7 @@ require 'extensions.rb'
 module DigiBase
   PLUGIN_ROOT_PATH = File.dirname(__FILE__) unless defined? PLUGIN_ROOT_PATH
 
-  module BsDD
+  module BSDD
     unless file_loaded?(__FILE__)
 
       # Version and release information.
@@ -40,15 +42,15 @@ module DigiBase
         PLUGIN_PATH       = File.join(PLUGIN_ROOT_PATH, 'db_bsdd')
         PLUGIN_IMAGE_PATH = File.join(PLUGIN_PATH, 'images')
 
-        BsDD_EXTENSION = SketchupExtension.new("DigiBase bsDD classification tool", File.join(PLUGIN_PATH, 'loader.rb'))
-        BsDD_EXTENSION.version = VERSION
-        BsDD_EXTENSION.description = 'Add classifications and properties from the BuildingSMART Data Dictionary to IFC objects.'
-        BsDD_EXTENSION.creator = 'DigiBase'
-        BsDD_EXTENSION.copyright = '2020'
-        Sketchup.register_extension(BsDD_EXTENSION, true)
+        BSDD_EXTENSION = SketchupExtension.new("DigiBase bSDD classification tool", File.join(PLUGIN_PATH, 'loader.rb'))
+        BSDD_EXTENSION.version = VERSION
+        BSDD_EXTENSION.description = 'Add classifications and properties from the BuildingSMART Data Dictionary to IFC objects.'
+        BSDD_EXTENSION.creator = 'DigiBase'
+        BSDD_EXTENSION.copyright = '2020'
+        Sketchup.register_extension(BSDD_EXTENSION, true)
       else
         UI.messagebox "You need at least SketchUp Pro 2016 to use this extension."
       end
     end
-  end # module BsDD
+  end # module BSDD
 end # module DigiBase

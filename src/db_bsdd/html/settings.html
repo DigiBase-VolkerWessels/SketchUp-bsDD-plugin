@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" style="overflow:hidden">
+
+<head>
+  <title>bSDD settings</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel='stylesheet' type='text/css' href='../css/bootstrap.min.css'>
+  <link rel='stylesheet' type='text/css' href='../css/dialog.css'>
+  <link rel='stylesheet' type='text/css' href='../css/entity_info.css'>
+  <script type='text/javascript' src='../js/jquery.min.js'></script>
+  <script type='text/javascript' src='../js/bootstrap.min.js'></script>
+  <script type='text/javascript' src='../js/bsdd.js'></script>
+</head>
+
+<body>
+  <form id="searchDomainsForm" style="display: flex;flex-direction: column;overflow:hidden">
+    <div class="container-fluid">
+      <h1>Select model IFC version</h1>
+      <select id="ifcVersion" class="form-control form-select">
+      </select>
+      <h1>Include related classifications</h1>
+      <div class="col-md-12 row">
+        <input type="checkbox" id="recursive" name="recursive">
+      </div>
+      <h1>Select bSDD domains to search</h1>
+    </div>
+    <div id="main" class="container-fluid">
+      <div id="searchDomains"></div>
+    </div>
+    <div id="footer" class="container-fluid">
+      <input class="btn btn-secondary btn-block" type="submit" value="Save">
+    </div>
+  </form>
+
+  <script>
+    (async function () {
+      const bsddUrl = 'https://test.bsdd.buildingsmart.org';
+      const bsddClassificationUrl = bsddUrl + "/api/Classification/v3";
+      const bsddDomainUrl = bsddUrl + "/api/Domain/v2";
+      const domainNamespaceUri = null;
+
+      getDomain(domainNamespaceUri).then((domains) => {
+        domains.forEach(domain => {
+          $('#searchDomains').append($('<div>')
+            .addClass('col-md-12 row')
+            .append($('<label>')
+              .addClass('check-inline')
+              .append($('<input>')
+                .prop('id', domain.namespaceUri.replace(/[^a-zA-Z0-9]/g, ''))
+                .prop('name', domain.namespaceUri)
+                .prop('type', 'checkbox')
+                .addClass('searchDomain')
+              )
+              .append(' ' + domain.name)
+            )
+          );
+        });
+
+        sketchup.ready({
+          onCompleted: function () {
+          }
+        });
+      });
+
+      $("#searchDomainsForm").on("submit", function (event) {
+        event.preventDefault();
+
+        // Add disabled form elements
+        var disabled = $(this).find(':input:disabled').removeAttr('disabled');
+
+        // serialize the form
+        var formData = $(this).serialize();
+
+        // re-disabled the set of inputs that you previously enabled
+        disabled.attr('disabled', 'disabled');
+
+        var formData = {
+          recursive: $("#recursive")[0].checked,
+          ifcVersion: $("#ifcVersion").val(),
+          classifications: Object.values($(this)[0])
+            .filter(function (element) {
+              return element.className === 'searchDomain';
+            })
+            .reduce((obj, element) => (obj[element.name] = element.checked, obj), {})
+        }
+        sketchup.save(JSON.stringify(formData));
+      });
+
+
+    }());
+    function updateIfcVersions(ifcVersionsJson) {
+      const ifcVersions = JSON.parse(ifcVersionsJson);
+      var select = $("#ifcVersion");
+      select.empty();
+      ifcVersions.forEach(ifcVersion => {
+        select.append($("<option></option>")
+          .attr("value", ifcVersion)
+          .text(ifcVersion));
+      });
+      $("#ifcVersion").val(ifcVersions[0]).change();
+    }
+  </script>
+</body>
+
+</html>

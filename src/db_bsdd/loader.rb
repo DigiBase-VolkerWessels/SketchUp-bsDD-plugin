@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # loader.rb
 
 # Copyright (c) 2020 DigiBase B.V.
@@ -20,21 +22,30 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Main loader for BsDD plugin
+# Main loader for bSDD plugin
 
 module DigiBase
-  module BsDD
-    attr_reader :toolbar
+  module BSDD
+    attr_reader :toolbar, :authentication
+
     extend self
 
-    PLATFORM_IS_OSX     = ( Object::RUBY_PLATFORM =~ /darwin/i ) ? true : false
+    PLATFORM_IS_OSX     = Object::RUBY_PLATFORM =~ /darwin/i ? true : false
     PLATFORM_IS_WINDOWS = !PLATFORM_IS_OSX
 
     # set icon file type
-    if PLATFORM_IS_WINDOWS
+    if Sketchup.version_number < 1_600_000_000
+      ICON_TYPE = '.png'
+      ICON_SMALL = '_small'
+      ICON_LARGE = '_large'
+    elsif PLATFORM_IS_WINDOWS
       ICON_TYPE = '.svg'
+      ICON_SMALL = ''
+      ICON_LARGE = ''
     else # OSX
       ICON_TYPE = '.pdf'
+      ICON_SMALL = ''
+      ICON_LARGE = ''
     end
 
     PLUGIN_PATH_HTML = File.join(PLUGIN_PATH, 'html')
@@ -45,21 +56,46 @@ module DigiBase
     PLUGIN_PATH_TOOLS = File.join(PLUGIN_PATH, 'tools')
     PLUGIN_PATH_CLASSIFICATIONS = File.join(PLUGIN_PATH, 'classifications')
 
-    # Create BsDD toolbar
-    @toolbar = UI::Toolbar.new "bsDD Classifier"
+    # Set the path to the correct Rubyzip version for this Ruby version
+    PLUGIN_ZIP_PATH = if RUBY_VERSION.split('.')[1].to_i < 4
+                        File.join(PLUGIN_PATH, 'lib', 'rubyzip-1.3.0')
+                      else
+                        File.join(PLUGIN_PATH, 'lib', 'rubyzip-2.3.2')
+                      end
+
+    require File.join(PLUGIN_PATH, 'auth.rb')
+    require File.join(PLUGIN_PATH, 'window.rb')
+
+    # Create bSDD toolbar
+    @toolbar = UI::Toolbar.new 'bSDD Classifier'
+
+    # Load settings from yaml file
+    require File.join(PLUGIN_PATH, 'settings.rb')
+    Settings.load()
+
+    # Create authenticator
+    @authentication = Authentication.new
 
     # Add open window button
-    require File.join(PLUGIN_PATH, 'window.rb')
-    btn_bsDD_window = UI::Command.new('Toggle bsDD classification window') {
+    btn_bsdd_window = UI::Command.new('Toggle bSDD classification window') do
       PropertiesWindow.toggle
-    }
-    btn_bsDD_window.small_icon = File.join(PLUGIN_PATH_IMAGE, "bsDD" + ICON_TYPE)
-    btn_bsDD_window.large_icon = File.join(PLUGIN_PATH_IMAGE, "bsDD" + ICON_TYPE)
-    btn_bsDD_window.tooltip = "add bsDD classification"
-    btn_bsDD_window.status_bar_text = "add bsDD classification"
+    end
+    btn_bsdd_window.small_icon = File.join(PLUGIN_PATH_IMAGE, 'bsdd' + ICON_TYPE)
+    btn_bsdd_window.large_icon = File.join(PLUGIN_PATH_IMAGE, 'bsdd' + ICON_TYPE)
+    btn_bsdd_window.tooltip = 'search bSDD'
+    btn_bsdd_window.status_bar_text = 'search bSDD and classify objects'
 
-    @toolbar.add_item btn_bsDD_window
+    # Open settings window
+    btn_settings_window = UI::Command.new('bSDD Classifier settings') do
+      Settings.toggle
+    end
+    btn_settings_window.small_icon = File.join(PLUGIN_PATH_IMAGE, "Settings#{ICON_SMALL}#{ICON_TYPE}")
+    btn_settings_window.large_icon = File.join(PLUGIN_PATH_IMAGE, "Settings#{ICON_LARGE}#{ICON_TYPE}")
+    btn_settings_window.tooltip = 'Open bSDD Classifier settings'
+    btn_settings_window.status_bar_text = 'Open bSDD Classifier settings'
+
+    @toolbar.add_item btn_settings_window
+    @toolbar.add_item btn_bsdd_window
     @toolbar.show
-
-  end # module BsDD
+  end # module BSDD
 end # module DigiBase

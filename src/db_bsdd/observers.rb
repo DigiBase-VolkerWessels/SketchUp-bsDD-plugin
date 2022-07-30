@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # observers.rb
 
 # Copyright (c) 2020 DigiBase B.V.
@@ -21,7 +23,7 @@
 # SOFTWARE.
 
 module DigiBase
- module BsDD
+ module BSDD
   module Observers
     attr_accessor :timestamp
     extend self
@@ -29,7 +31,6 @@ module DigiBase
     def update()
       if(Time.now.to_f - Observers.timestamp) > 0.5
         Observers.timestamp = Time.now.to_f
-        PropertiesWindow.set_html()
       end
     end
 
@@ -41,7 +42,6 @@ module DigiBase
       end
       def onSelectionCleared(selection)
         puts 'onSelectionCleared'
-        PropertiesWindow.set_html()
       end
       def onSelectionAdded(selection,entity)
         puts 'onSelectionAdded'
@@ -52,16 +52,14 @@ module DigiBase
     class IMEntitiesObserver < Sketchup::EntitiesObserver
       def onElementModified(entities,entity)
         puts 'onElementModified'
-        if Sketchup.active_model.selection.include?(entity)
-          Observers.timestamp = Time.now.to_f
-          PropertiesWindow.set_html()
-        end
+        # if Sketchup.active_model.selection.include?(entity)
+        #   Observers.timestamp = Time.now.to_f
+        # end
       end
       def onElementAdded(entities,entity)
         puts 'onElementAdded'
         if entity.deleted? || Sketchup.active_model.selection.include?(entity)
           Observers.timestamp = Time.now.to_f
-          PropertiesWindow.set_html()
         end
       end
     end
@@ -110,5 +108,5 @@ module DigiBase
       Sketchup.active_model.selection.remove_observer(@app_observer)
     end # def stop
   end # module Observers
- end # module BsDD
+ end # module BSDD
 end # module DigiBase
