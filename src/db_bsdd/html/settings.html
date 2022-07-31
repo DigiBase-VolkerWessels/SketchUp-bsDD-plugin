@@ -23,6 +23,10 @@
       <div class="col-md-12 row">
         <input type="checkbox" id="recursive" name="recursive">
       </div>
+      <h1>Use bSDD test environment</h1>
+      <div class="col-md-12 row">
+        <input type="checkbox" id="test_environment" name="test_environment">
+      </div>
       <h1>Select bSDD domains to search</h1>
     </div>
     <div id="main" class="container-fluid">
@@ -77,6 +81,7 @@
 
         var formData = {
           recursive: $("#recursive")[0].checked,
+          test_environment: $("#test_environment")[0].checked,
           ifcVersion: $("#ifcVersion").val(),
           classifications: Object.values($(this)[0])
             .filter(function (element) {

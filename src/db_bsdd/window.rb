@@ -60,6 +60,16 @@ module DigiBase
         end
       }
 
+      @window.add_action_callback("set_environment") { |action_context|
+        if DigiBase::BSDD::Settings.test_environment
+          environment = 'test'
+        else
+          environment = 'production'
+        end        
+        js_command = "environment = '" + environment + "';"
+        @window.execute_script(js_command)
+      }
+
       @window.add_action_callback("set_recursive_setting") { |action_context|
         classifications = Settings.classifications.select {|k,v| v == true}        
         js_command = "recursive_setting = " + DigiBase::BSDD::Settings.recursive.to_s + ";"
@@ -76,7 +86,6 @@ module DigiBase
       }
 
       @window.add_action_callback("save") { |action_context, form|
-        puts form
         model = Sketchup.active_model
         classifications = model.classifications
         CGI::parse(form).each_pair do |key, array_value|          

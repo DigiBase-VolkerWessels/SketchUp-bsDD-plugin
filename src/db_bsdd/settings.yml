@@ -86,4 +86,5 @@ ifc_versions:
 - IFC 4
 ignored_domains:
 - ifc-4.3
+test_environment: true
 recursive: true

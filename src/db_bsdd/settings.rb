@@ -30,7 +30,7 @@ module DigiBase
     module Settings
       extend self
 
-      attr_reader :window, :ready, :classifications, :recursive, :ifc_version, :ignored_domains
+      attr_reader :window, :ready, :classifications, :recursive, :ifc_version, :ignored_domains, :test_environment
 
       @window = false
       @ready = false
@@ -39,6 +39,7 @@ module DigiBase
       @ifc_version = @default_ifc_version
       @ifc_versions = ['IFC 2x3', 'IFC 4']
       @ignored_domains = ['ifc-4.3']
+      @test_environment = false;
       @settings_file = File.join(PLUGIN_PATH, 'settings.yml')
       @classifications = {}
       @window_options = {
@@ -75,7 +76,8 @@ module DigiBase
             @classifications = settings['classifications']
           end
           @ifc_version = settings['ifc_version'] if settings.key?('ifc_version')
-          @ignored_domains = settings['ignored_domains'] if settings.key?('ignored_domains')          
+          @ignored_domains = settings['ignored_domains'] if settings.key?('ignored_domains')
+          @test_environment = settings['test_environment'] if settings.key?('test_environment')
           @active_ifc_versions = settings['ifc_versions'] if settings.key?('ifc_versions')
           @recursive = settings['recursive'] if settings.key?('recursive')
         end
@@ -91,6 +93,9 @@ module DigiBase
       def create
         @window = UI::HtmlDialog.new(@window_options)
         @window.add_action_callback('ready') do |_action_context|
+          js_command = "$('#test_environment').prop('checked', #{@test_environment});"
+          @window.execute_script(js_command)
+
           js_command = "$('#recursive').prop('checked', #{@recursive});"
           @window.execute_script(js_command)
 
@@ -113,6 +118,7 @@ module DigiBase
           settings = JSON.parse(form_data)
           @classifications = settings['classifications']
           @recursive = settings['recursive']
+          @test_environment = settings['test_environment']
           ifc_versions = @ifc_versions.union(@active_ifc_versions)
           @ifc_version = settings['ifcVersion']
           File.open(@settings_file, 'w') { |f| f.write({
@@ -120,6 +126,7 @@ module DigiBase
             'ifc_version' => @ifc_version,
             'ifc_versions' => ifc_versions,
             'ignored_domains' => @ignored_domains,
+            'test_environment' => @test_environment,
             'recursive' => @recursive
           }.to_yaml) }
           close
