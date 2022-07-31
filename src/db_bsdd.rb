@@ -35,10 +35,9 @@ module DigiBase
     unless file_loaded?(__FILE__)
 
       # Version and release information.
-      VERSION = '1.0.1'.freeze
+      VERSION = '2.0.0'.freeze
 
-      # load plugin only if SketchUp version is PRO
-      if Sketchup.is_pro? && Sketchup.version_number>1600000000
+      if  Sketchup.version_number>1700000000
         PLUGIN_PATH       = File.join(PLUGIN_ROOT_PATH, 'db_bsdd')
         PLUGIN_IMAGE_PATH = File.join(PLUGIN_PATH, 'images')
 
@@ -46,10 +45,10 @@ module DigiBase
         BSDD_EXTENSION.version = VERSION
         BSDD_EXTENSION.description = 'Add classifications and properties from the BuildingSMART Data Dictionary to IFC objects.'
         BSDD_EXTENSION.creator = 'DigiBase'
-        BSDD_EXTENSION.copyright = '2020'
+        BSDD_EXTENSION.copyright = '2022'
         Sketchup.register_extension(BSDD_EXTENSION, true)
       else
-        UI.messagebox "You need at least SketchUp Pro 2016 to use this extension."
+        UI.messagebox "You need at least SketchUp 2017 to use this extension."
       end
     end
   end # module BSDD
