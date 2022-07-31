@@ -83,6 +83,14 @@ module DigiBase
             value = array_value[0]            
             key_list = key.split('___')
             case key_list[0]
+            when "name"
+              unless value.empty?
+                model.selection.each do |entity|
+                  if defined?(entity.name)
+                    entity.name = value
+                  end
+                end
+              end
             when "material"
               material_name = value
               material = model.materials[material_name]
@@ -97,42 +105,46 @@ module DigiBase
             when "domain"
               domain_name = key_list[1].gsub(/[^0-9A-z.\- ]/, '') # remove non filename characters
               domain_name.gsub!(/ +/,' ') # remove multiple spaces
-              classification_name = key_list[2]
-              domain_namespace_uri = value
-              # Check if classification is loaded, otherwise load it
-              unless classifications[domain_name]
-                file = File.join(PLUGIN_PATH_CLASSIFICATIONS, domain_name + ".skc")
 
-                # If not in plugin lib folder then check support files
-                unless file
-                  file = Sketchup.find_support_file(classification + ".skc", "Classifications")
-                end
-                if File.file?(file) && classifications.load_schema(file)
-                  classifications.load_schema(file) if !file.nil?
-                  message = "Classification loaded:\r\n'#{domain_name}'"
-                  puts message
-                  notification = UI::Notification.new(BSDD_EXTENSION, message)
-                  notification.show
-                else
-                  success = false
-                  token = BSDD::authentication.token
-                  if token
-                    classification = DigiBase::BSDD::Classification.new(domain_name, domain_namespace_uri, token)
-                    skc_path = classification.download
-                    if File.file?(skc_path) && classifications.load_schema(skc_path)
-                      classifications.load_schema(file) if !file.nil?
-                      message = "Classification loaded:\r\n'#{domain_name}'"
-                      puts message
-                      success = true
-                      notification = UI::Notification.new(BSDD_EXTENSION, message)
-                      notification.show
-                    end
+              # Don't use bSDD version of IFC, keep to the sketchup version
+              unless domain_name == 'ifc-4.3'
+                classification_name = key_list[2]
+                domain_namespace_uri = value
+                # Check if classification is loaded, otherwise load it
+                unless classifications[domain_name]
+                  file = File.join(PLUGIN_PATH_CLASSIFICATIONS, domain_name + ".skc")
+
+                  # If not in plugin lib folder then check support files
+                  unless file
+                    file = Sketchup.find_support_file(classification + ".skc", "Classifications")
                   end
-                  unless success
-                    message = "Unable to load classification:\r\n'#{domain_name}'"
+                  if File.file?(file) && classifications.load_schema(file)
+                    classifications.load_schema(file) if !file.nil?
+                    message = "Classification loaded:\r\n'#{domain_name}'"
                     puts message
                     notification = UI::Notification.new(BSDD_EXTENSION, message)
                     notification.show
+                  else
+                    success = false
+                    token = BSDD::authentication.token
+                    if token
+                      classification = DigiBase::BSDD::Classification.new(domain_name, domain_namespace_uri, token)
+                      skc_path = classification.download
+                      if skc_path && File.file?(skc_path) && classifications.load_schema(skc_path)
+                        classifications.load_schema(file) if !file.nil?
+                        message = "Classification loaded:\r\n'#{domain_name}'"
+                        puts message
+                        success = true
+                        notification = UI::Notification.new(BSDD_EXTENSION, message)
+                        notification.show
+                      end
+                    end
+                    unless success
+                      message = "Unable to load classification:\r\n'#{domain_name}'"
+                      puts message
+                      notification = UI::Notification.new(BSDD_EXTENSION, message)
+                      notification.show
+                    end
                   end
                 end
               end
@@ -270,7 +282,6 @@ module DigiBase
               definition = ent.definition
               definition.add_classification(domain, classification)
 
-
               # Store properties
               if properties.is_a? Array
                 properties.each do |property|
@@ -302,25 +313,6 @@ module DigiBase
         end
       }
     end # def create
-
-    # def update_search_list()
-    #   search_list = Hash.new
-    #   if @guid != ""
-    #     result = BSDD.get_SearchListOpen(domain_guid=@guid, search_text="", language_code=@language_value, related_ifc_entity=@ifcFilter.value)
-    #     if result["domains"]
-    #       result["domains"].each do |domain|
-    #         if domain["classifications"]
-    #           domain["classifications"].each do |search_results|
-    #             search_list[search_results["namespaceUri"]] = search_results["name"]
-    #           end
-    #         end
-    #       end
-    #     end
-    #   end
-    #   @search.options = search_list
-    #   @search.set_options()
-    #   @search.value = "-"
-    # end # def update_search_list
 
     def close
       BSDD::Observers.stop

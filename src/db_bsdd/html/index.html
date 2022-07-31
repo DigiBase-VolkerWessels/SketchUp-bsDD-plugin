@@ -1,211 +1,425 @@
 <head>
-    <title>Edit IFC properties</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel='stylesheet' type='text/css' href='../css/bootstrap.min.css'>
-    <link rel='stylesheet' type='text/css' href='../css/dialog.css'>
-    <link rel='stylesheet' type='text/css' href='../css/select2.min.css'>
-    <link rel='stylesheet' type='text/css' href='../css/entity_info.css'>
-    <script type='text/javascript' src='../js/jquery.min.js'></script>
-    <script type='text/javascript' src='../js/select2.min.js'></script>
-    <script type='text/javascript' src='../js/bootstrap.min.js'></script>
-  </head>
-  
-  <body>  
-      <form id="bSDD_form" style="display: flex;flex-direction: column;overflow:hidden">        
-        <div class="container-fluid">
-          <div class="row">
-            <h1 class="title">bSDD search</h1>
-          </div>
-          <div class="form-group">
-            <select class="form-control" id="bSDD" data-width="100%"></select>
-          </div>
-        </div>
-        </div>
-        <div id="main" class="container-fluid">
-          <div class="card">
-            <div id="ClassificationsHeader" class="row header" data-toggle="collapse" data-target="#ClassificationsContent"
-              aria-controls="filtersContent">
-              <h1 class="title">Classifications</h1>
-              <img src="../images/maximize.png">
-            </div>
-            <div id="ClassificationsContent" class="card-body collapse" aria-labelledby="ClassificationsHeader">
-            </div>
-          </div>  
-          <div class="card">
-            <div id="propertySetsHeader" class="row header" data-toggle="collapse" data-target="#propertySetsContent"
-              aria-controls="filtersContent">
-              <h1 class="title">Propertysets</h1>
-              <img src="../images/maximize.png">
-            </div>
-            <div id="propertySetsContent" class="card-body collapse show" aria-labelledby="propertySetsHeader">
-            </div>
-          </div>
-        </div>
-        <div id="footer" class="container-fluid">
-          <input class="btn btn-secondary btn-block" type="submit" value="Apply to selection">
-        </div>
-      </form>
+  <title>Edit IFC properties</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel='stylesheet' type='text/css' href='../css/bootstrap.min.css'>
+  <link rel='stylesheet' type='text/css' href='../css/dialog.css'>
+  <link rel='stylesheet' type='text/css' href='../css/select2.min.css'>
+  <link rel='stylesheet' type='text/css' href='../css/entity_info.css'>
+  <script type='text/javascript' src='../js/jquery.min.js'></script>
+  <script type='text/javascript' src='../js/select2.min.js'></script>
+  <script type='text/javascript' src='../js/bootstrap.min.js'></script>
+</head>
+
+<body>
+  <form id="bSDD_form" style="display: flex;flex-direction: column;overflow:hidden">
+    <input type="hidden" name="name" id="name" value="">
+    <input type="hidden" name="material" id="material" value="">
+    <div class="container-fluid">
+      <div class="row">
+        <h1 class="title">bSDD search</h1>
+      </div>
+      <div class="form-group">
+        <select class="form-control" id="bSDD" data-width="100%"></select>
+      </div>
     </div>
-    <script>
-      var bsddClassificationUrl = "https://test.bsdd.buildingsmart.org/api/Classification/v3";
-      var bsddDomainUrl = "https://test.bsdd.buildingsmart.org/api/Domain/v2";
-      var bsddSearchUrl = "https://test.bsdd.buildingsmart.org/api/TextSearchListOpen/v5";
-      var domainNamespaceUris = "[]";
-      var recursive_setting = false;
-      var compare_material;
-      var compare_layer;
-      var material = false;
-      $(document).ready(function () {
-        sketchup.set_recursive_setting({
-          onCompleted: function () {}
-        });
-        sketchup.updateDomainNamespaceUris({
-          onCompleted: function () {}
-        });
-        sketchup.ready({
-          onCompleted: function () {
-            compare_material = $("#material").val();
-            compare_layer = $("#layer").val();
+    </div>
+    <div id="main" class="container-fluid">
+      <div class="card">
+        <div id="ClassificationsHeader" class="row header" data-toggle="collapse" data-target="#ClassificationsContent"
+          aria-controls="filtersContent">
+          <h1 class="title">Classifications</h1>
+          <img src="../images/maximize.png">
+        </div>
+        <div id="ClassificationsContent" class="card-body collapse" aria-labelledby="ClassificationsHeader">
+        </div>
+      </div>
+      <div class="card">
+        <div id="propertySetsHeader" class="row header" data-toggle="collapse" data-target="#propertySetsContent"
+          aria-controls="filtersContent">
+          <h1 class="title">Propertysets</h1>
+          <img src="../images/maximize.png">
+        </div>
+        <div id="propertySetsContent" class="card-body collapse show" aria-labelledby="propertySetsHeader">
+        </div>
+      </div>
+    </div>
+    <div id="footer" class="container-fluid">
+      <input class="btn btn-secondary btn-block" type="submit" value="Apply to selection">
+    </div>
+  </form>
+  </div>
+  <script>
+    var bsddClassificationUrl = "https://test.bsdd.buildingsmart.org/api/Classification/v3";
+    var bsddDomainUrl = "https://test.bsdd.buildingsmart.org/api/Domain/v2";
+    var bsddSearchUrl = "https://test.bsdd.buildingsmart.org/api/TextSearchListOpen/v5";
+    var domainNamespaceUris = "[]";
+    var recursive_setting = false;
+    var compare_material;
+    var compare_layer;
+    var material = false;
+    $(document).ready(function () {
+      sketchup.set_recursive_setting({
+        onCompleted: function () { }
+      });
+      sketchup.updateDomainNamespaceUris({
+        onCompleted: function () { }
+      });
+      sketchup.ready({
+        onCompleted: function () {
+          compare_material = $("#material").val();
+          compare_layer = $("#layer").val();
+        }
+      });
+    });
+
+    $("#bSDD_form").on("submit", function (event) {
+      event.preventDefault();
+
+      // Add disabled form elements
+      var disabled = $(this).find(':input:disabled').removeAttr('disabled');
+
+      // serialize the form
+      var formData = $(this).serialize();
+
+      // re-disabled the set of inputs that you previously enabled
+      disabled.attr('disabled', 'disabled');
+      sketchup.save(formData);
+    });
+
+    $("#bSDD_form").on("submit", function (event) {
+      event.preventDefault();
+      console.log($(this).serialize());
+    });
+
+    $("#material").change(function () {
+      var value = $(this).val();
+      if (value != compare_material) {
+        sketchup.material(value);
+      }
+    });
+    $("#layer").change(function () {
+      var value = $(this).val();
+      if (value != compare_material) {
+        console.log('layer changed');
+        sketchup.layer(value);
+      }
+    });
+    var update_material = function (id, value_id, value_text) {
+      compare_material = value_id;
+      if ($("#material").find("option[value='" + value_id + "']").length) {
+        $("#material").val(value_id).trigger('change');
+      }
+    }
+    var update_layer = function (id, value_id, value_text) {
+      compare_layer = value_id;
+      if ($("#layer").find("option[value='" + value_id + "']").length) {
+        $("#layer").val(value_id).trigger('change');
+      }
+    }
+    $('#bSDD').select2({
+      placeholder: "Search bSDD",
+      minimumInputLength: 3,
+      templateResult: function (data) {
+        var $result = $(
+          '<div class="row" title="' + data.description + '">' +
+          '<div style="visibility: hidden;">' + data.id + '</div>' +
+          '<div class="col-8">' + data.text + '</div>' +
+          '<div class="col-4">' + data.domain + '</div>' +
+          '</div>'
+        );
+        return $result;
+      },
+      ajax: {
+        url: bsddSearchUrl,
+        data: function (params) {
+          var queryParameters = {
+            SearchText: params.term,
+            TypeFilter: 'Classifications',
+            DomainNamespaceUris: domainNamespaceUris
           }
-        });
-      });
-
-      $( "#bSDD_form" ).on( "submit", function( event ) {
-        event.preventDefault();
-
-        // Add disabled form elements
-        var disabled = $( this ).find(':input:disabled').removeAttr('disabled');
-
-        // serialize the form
-        var formData = $( this ).serialize();
-
-        // re-disabled the set of inputs that you previously enabled
-        disabled.attr('disabled','disabled');
-
-        sketchup.save(formData);
-      });
-
-      $( "#bSDD_form" ).on( "submit", function( event ) {
-        event.preventDefault();
-        console.log( $( this ).serialize() );
-      });
-      
-      $("#material").change(function () {
-        var value = $(this).val();
-        if (value != compare_material) {
-          console.log('material changed');
-          sketchup.material(value);
-        }
-      });
-      $("#layer").change(function () {
-        var value = $(this).val();
-        if (value != compare_material) {
-          console.log('layer changed');
-          sketchup.layer(value);
-        }
-      });
-      var update_material = function (id, value_id, value_text) {
-        compare_material = value_id;
-        if ($("#material").find("option[value='" + value_id + "']").length) {
-          $("#material").val(value_id).trigger('change');
-        }
-      }
-      var update_layer = function (id, value_id, value_text) {
-        compare_layer = value_id;
-        if ($("#layer").find("option[value='" + value_id + "']").length) {
-          $("#layer").val(value_id).trigger('change');
-        }
-      }
-      $('#bSDD').select2({
-        placeholder: "Search bSDD",
-        minimumInputLength: 3,
-        templateResult: function (data) {
-          var $result = $(
-            '<div class="row" title="' + data.description + '">' +
-            '<div style="visibility: hidden;">' + data.id + '</div>' +
-            '<div class="col-8">' + data.text + '</div>' +
-            '<div class="col-4">' + data.domain + '</div>' +
-            '</div>'
-          );
-          return $result;
+          return queryParameters;
         },
-        ajax: {
-          url: bsddSearchUrl,
-          data: function (params) {
-            var queryParameters = {
-              SearchText: params.term,
-              TypeFilter: 'Classifications',
-              DomainNamespaceUris: domainNamespaceUris
-            }  
-            return queryParameters;
+        processResults: function (data, params) {
+          params.page = params.page || 1;
+          var list = data.classifications.map(c => ({ id: c.namespaceUri, text: c.name, domain: c.domainName, description: c.description }));
+          return {
+            results: list
+          };
+        }
+      }
+    });
+
+    // workaround for wrong select2 focus: https://github.com/select2/select2/issues/5993 
+    $(document).on('select2:open', () => {
+      document.querySelector('.select2-search__field').focus();
+    });
+
+    $('#bSDD').on('select2:select', function (e) {
+      $('#propertySetsContent').html('');
+      $('#ClassificationsContent').html('');
+      $('#material').val('');
+      $('#name').val('');
+      $('#ifc2x3').html('');
+      material = false;
+      name = false;
+      var data = e.params.data;
+      setClassification(data.id, true)
+    });
+
+    function getDomain(domainNamespaceUri) {
+      $.ajax({
+        url: bsddDomainUrl,
+        data: { namespaceUri: domainNamespaceUri },
+        statusCode: {
+          404: function (responseObject, textStatus, jqXHR) {
+            // No content found (404)
+            // This code will be executed if the server returns a 404 response
+            console.log('No content found (404)');
           },
-          processResults: function (data, params) {
-            params.page = params.page || 1;
-            var list = data.classifications.map(c => ({ id: c.namespaceUri, text: c.name, domain: c.domainName, description: c.description }));
-            return {
-              results: list
-            };
+          503: function (responseObject, textStatus, errorThrown) {
+            // Service Unavailable (503)
+            // This code will be executed if the server returns a 503 response
+            console.log('Service Unavailable (503)');
           }
         }
-      });
+      })
+        .done(function (domains) {
+          if (domains.length > 0) {
+            var domain = domains[0];
+            return domain;
+          }
+          console.log('No domain found');
+        })
+        .fail(function (jqXHR, textStatus) {
+          console.log('Something went wrong: ' + textStatus);
+          console.log("Unable to find domain:" + domainNamespaceUri)
+        });
+    }
 
-      // workaround for wrong select2 focus: https://github.com/select2/select2/issues/5993 
-      $(document).on('select2:open', () => {
-        document.querySelector('.select2-search__field').focus();
-      });
+    function addClassification(namespaceUri, classification, classificationName = null, relationType = null, toplevel = false) {
+      var description;
+      var classificationUriParts = namespaceUri.split("/");
+      var domainName = getDomainName(namespaceUri, classification);
 
-      $('#bSDD').on('select2:select', function (e) {
-        $('#propertySetsContent').html('');
-        $('#ClassificationsContent').html('');
-        $('#material').html('');
-        $('#ifc2x3').html('');
-        material = false;
-        var data = e.params.data;
-        setClassification(data.id, true)
-      });
+      classificationName = getClassificationName(namespaceUri, classification, classificationName);
 
-      function getDomain(domainNamespaceUri){
-        $.ajax({
-            url: bsddDomainUrl,
-            data: { namespaceUri: domainNamespaceUri },
-            statusCode: {
-              404: function (responseObject, textStatus, jqXHR) {
-                // No content found (404)
-                // This code will be executed if the server returns a 404 response
-                console.log('No content found (404)');
-              },
-              503: function (responseObject, textStatus, errorThrown) {
-                // Service Unavailable (503)
-                // This code will be executed if the server returns a 503 response
-                console.log('Service Unavailable (503)');
-              }
-            }
-          })
-          .done(function (domains) {
-            if (domains.length > 0) {
-              var domain = domains[0];
-              return domain;
-            }
-            console.log('No domain found');
-          })
-          .fail(function (jqXHR, textStatus) {
-            console.log('Something went wrong: ' + textStatus);
-            console.log("Unable to find domain:" + domainNamespaceUri)
-          });
+
+      if (toplevel === true) {
+        $('#name').val(classificationName);
       }
 
-      function addClassification(namespaceUri, classification, classificationName=null, relationType=null){
-        var domainName;
-        var description;
-        var domainNamespaceUri = classification.domainNamespaceUri;
-        var classificationUriParts = namespaceUri.split("/");
-              
-        if ('name' in classification) {
-          classificationName = classification.name;
+      var classificationContainerId = domainName + '___' + classificationName;
+      if ($('#' + classificationContainerId).length === 0) {
+
+        classificationLabel = $('<label for="name" class="col-3 col-form-label">')
+          .html(domainName);
+
+        classificationContainer = $('<div>')
+          .addClass('form-group row section')
+          .append(classificationLabel)
+          .prop('id', classificationContainerId);
+        var inputContainer = $('<div>');
+        inputContainer.addClass('row col-9');
+
+        if (classification !== null && classification !== undefined && classification.domainNamespaceUri !== undefined) {
+          var inputHidden = $('<input>');
+          inputHidden.prop('name', 'domain___' + domainName + '___' + classificationName);
+          inputHidden.prop('type', 'hidden');
+          inputHidden.val(classification.domainNamespaceUri);
+          inputContainer.append(inputHidden);
         }
 
-        if(domainNamespaceUri !== undefined){
+        classificationContainer.append(inputContainer);
+
+        console.log(domainName);
+        var input = $('<input>');
+        input.addClass('form-control');
+        if (recursive_setting === true) {
+          input.addClass('highlight');
+        }
+        input.prop('name', 'classification___' + domainName + '___' + classificationName);
+        if (classification !== null && classification !== undefined) {
+          if (classification.definition !== undefined) {
+            input.prop('title', classification.definition);
+          }
+        }
+        input.prop('readonly', true);
+        input.prop('type', 'text');
+        input.val(classificationName);
+        inputContainer.append(input);
+
+        $('#ClassificationsContent').append(classificationContainer);
+      }
+
+      if (relationType == 'HasMaterial') {
+        if (!material) {
+          material = true;
+          classificationLabel.append($('<img src="../images/material.svg" style="float:right" title="Material classification: in addition to being added as a classification, it is also added as a material">'));
+          $('#material').val(classificationName);
+        } else if (material) {
+          classificationLabel.append($('<img src="../images/material.svg" style="filter:grayscale(100%);filter:brightness(1000%);filter:contrast(10%);float:right" title="Additional material classification: NOT added as Sketchup material">'))
+        }
+      }
+    }
+
+
+
+    // classificationName is added as backup classification name in case url is not valid
+    function setClassification(namespaceUri, expand = false, classificationName = null, relationType = null) {
+
+      $.ajax({
+        url: bsddClassificationUrl,
+        data: { namespaceUri: namespaceUri },
+        statusCode: {
+          404: function (responseObject, textStatus, jqXHR) {
+            // No content found (404)
+            // This code will be executed if the server returns a 404 response
+            console.log('No content found (404)');
+          },
+          503: function (responseObject, textStatus, errorThrown) {
+            // Service Unavailable (503)
+            // This code will be executed if the server returns a 503 response
+            console.log('Service Unavailable (503)');
+          }
+        }
+      })
+        .done(function (classification) {
+          addClassification(namespaceUri, classification, classificationName, relationType, toplevel = expand);
+          if (classification) {
+            if ('classificationProperties' in classification) {
+              classification.classificationProperties.map(property => setProperty(property, expand));
+            }
+            if ('classificationRelations' in classification) {
+
+              // If the selected classification has other classification references it must be visible
+              $('#ClassificationsContent').addClass('show')
+              classification.classificationRelations.map(relation => setRelation(relation));
+            }
+          }
+        })
+        .fail(function (jqXHR, textStatus) {
+          console.log('Something went wrong: ' + textStatus);
+          console.log("Unable to find classification: " + namespaceUri);
+          console.log("Using fallback method");
+          addClassification(namespaceUri, null, classificationName, relationType);
+        });
+    }
+
+    function setProperty(classificationProperty, expand = false) {
+      if (classificationProperty) {
+        if ('propertyNamespaceUri' in classificationProperty) {
+          var propertyNamespaceUri = classificationProperty.propertyNamespaceUri;
+        }
+        if ('propertySet' in classificationProperty) {
+          var propertySet = classificationProperty.propertySet;
+          var psetContent = $('#' + propertySet + 'Content');
+          if (psetContent.length == 0) {
+            var psetContainer = $('<div>')
+              .html('<div class="row" id="' + propertySet + 'Header" data-toggle="collapse" data-target="#' + propertySet + 'Content">\
+                  <h1>' + propertySet + '</h1>\
+                  <img src="../images/maximize.png">\
+                  </div>');
+            psetContent = $('<div>')
+              .addClass('collapse')
+              .prop('id', propertySet + 'Content');
+            if (expand === true) {
+              psetContent.addClass('show');
+            }
+            psetContainer.append(psetContent);
+            $('#propertySetsContent').append(psetContainer);
+          }
+          if ('name' in classificationProperty) {
+            var dataType = null;
+            if ('dataType' in classificationProperty) {
+              var dataType = classificationProperty.dataType;
+            }
+            var name = 'property___' + propertySet + '___' + classificationProperty.name.replace(/[^a-z0-9 _-]/gi, '-') + '___' + dataType;
+            var propertyContainer = $('#' + name);
+            if (propertyContainer.length == 0) {
+              propertyContainer = $('<div>')
+                .prop('id', name)
+                .addClass('form-group row section show')
+                .append($('<label for="name" class="col-3 col-form-label">').html(classificationProperty.name));
+              psetContent.append(propertyContainer);
+              var inputContainer = $('<div>');
+              inputContainer.addClass('row col-9');
+              var input = $('<input>')
+                .prop('name', name)
+                .addClass('form-control');
+              var indeterminate = true;
+              if ('predefinedValue' in classificationProperty) {
+                var predefinedValue = classificationProperty.predefinedValue;
+                switch (predefinedValue) {
+                  case 'TRUE':
+                    input.prop('checked', true);
+                    input.val(true);
+                    indeterminate = false;
+                    break;
+                  case 'FALSE':
+                    input.prop('checked', false);
+                    input.val(false);
+                    indeterminate = false;
+                    break;
+                  default:
+                    input.val(predefinedValue);
+                }
+                input.prop('disabled', 'disabled');
+                input.prop('readonly', true);
+              }
+              if (expand === true && recursive_setting === true) {
+                input.addClass('highlight');
+              }
+
+              if ('IsRequired' in classificationProperty) {
+                input.prop('required', true);
+              }
+              switch (classificationProperty.dataType) {
+                case 'Boolean':
+                  input.prop('type', 'checkbox');
+                  input.addClass('form-check-input');
+                  if (indeterminate) {
+                    input.prop('indeterminate', true);
+                  }
+                  break;
+                case 'String':
+                  input.prop('type', 'text');
+                  break;
+                default:
+                  input.prop('type', 'text');
+              }
+              inputContainer.append(input);
+              propertyContainer.append(inputContainer);
+            }
+          }
+        }
+      }
+    }
+    function setRelation(classificationRelation) {
+      if (recursive_setting === true) {
+        if ('relatedClassificationUri' in classificationRelation) {
+          console.log(classificationRelation.relationType);
+          setClassification(classificationRelation.relatedClassificationUri, null, classificationRelation.relatedClassificationName, classificationRelation.relationType);
+        }
+      }
+    }
+
+    function getClassificationName(namespaceUri, classification, classificationName) {
+      if (classificationName === null) {
+        if ('name' in classification) {
+          return classification.name;
+        }
+        else {
+          return namespaceUri.split("/")[7];
+        }
+      }
+      return classificationName;
+    }
+
+    function getDomainName(namespaceUri, classification) {
+      if (classification !== null && classification !== undefined) {
+        var domainNamespaceUri = classification.domainNamespaceUri;
+        if (domainNamespaceUri !== undefined) {
           $.ajax({
             url: bsddDomainUrl,
             data: { namespaceUri: domainNamespaceUri },
@@ -223,228 +437,18 @@
               }
             }
           })
-          .done(function (domains) {
-            if (domains.length > 0) {
-              var domain = domains[0];
-              domainName = domain.name;
-            } else {              
-              domainName = classificationUriParts[5];
-            }
-          })
-          .fail(function (jqXHR, textStatus) {
-            console.log('Something went wrong: ' + textStatus);
-            console.log("Unable to find domain:" + domainNamespaceUri)
-          });
-
-          classificationLabel = $('<label for="name" class="col-3 col-form-label">')
-            .html(domainName);
-
-          classificationContainer = $('<div>')
-            .addClass('form-group row section')
-            .append(classificationLabel);
-          var inputContainer = $('<div>');
-          inputContainer.addClass('row col-9');
-          
-          var inputHidden = $('<input>');
-          inputHidden.prop('name', 'domain___' + domainName + '___' + classificationName);
-          inputHidden.prop('type', 'hidden');
-          inputHidden.val(domainNamespaceUri);
-          inputContainer.append(inputHidden);
-          classificationContainer.append(inputContainer);
-
-          var input = $('<input>');
-          input.addClass('form-control');
-          if(recursive_setting===true){            
-            input.addClass('highlight');
-          }
-          input.prop('name', 'classification___' + domainName + '___' + classificationName);
-          input.prop('title', classification.definition);
-          input.prop('readonly', true);
-          input.prop('type', 'text');
-          input.val(classificationName);
-          inputContainer.append(input);
-          
-          $('#ClassificationsContent').append(classificationContainer);
-
-          if(relationType=='HasMaterial'){
-            if(!material){
-              material = true;
-              classificationLabel.append($('<img src="../images/material.svg" style="float:right" title="Material classification: in addition to being added as a classification, it is also added as a material">'));
-              $('#material').val(classificationName)
-                .addClass('highlight');
-            } else if(material){
-              classificationLabel.append($('<img src="../images/material.svg" style="filter:grayscale(100%);filter:brightness(1000%);filter:contrast(10%);float:right" title="Additional material classification: NOT added as Sketchup material">'))
-            }
-          }
-        } else {
-          domainName = classificationUriParts[5];
-        }
-        if(classificationName==null || classificationName==undefined){
-          classificationName = classificationUriParts[7];
+            .done(function (domains) {
+              if (domains.length > 0) {
+                return domains[0].name;
+              }
+            })
+            .fail(function (jqXHR, textStatus) {
+              console.log('Something went wrong: ' + textStatus);
+              console.log("Unable to find domain:" + domainNamespaceUri)
+            });
         }
       }
-
-      // classificationName is added as backup classification name in case url is not valid
-      function setClassification(namespaceUri, expand=false, classificationName=null, relationType=null) {
-
-        $.ajax({
-          url: bsddClassificationUrl,
-          data: { namespaceUri: namespaceUri },
-          statusCode: {
-            404: function (responseObject, textStatus, jqXHR) {
-              // No content found (404)
-              // This code will be executed if the server returns a 404 response
-              console.log('No content found (404)');
-            },
-            503: function (responseObject, textStatus, errorThrown) {
-              // Service Unavailable (503)
-              // This code will be executed if the server returns a 503 response
-              console.log('Service Unavailable (503)');
-            }
-          }
-        })
-          .done(function (classification) {
-            console.log('classification');
-            console.log(classification);
-            if (classification) {
-              addClassification(namespaceUri, classification, classificationName, relationType)
-              if ('classificationProperties' in classification) {
-                classification.classificationProperties.map(property => setProperty(property, expand));
-              }
-              if ('classificationRelations' in classification) {
-
-                // If the selected classification has other classification references it must be visible
-                $('#ClassificationsContent').addClass('show')
-                classification.classificationRelations.map(relation => setRelation(relation));
-              }
-            }
-          })
-          .fail(function (jqXHR, textStatus) {
-            console.log('Something went wrong: ' + textStatus);
-            console.log("Unable to find classification:" + namespaceUri)
-          });
-      }
-      function setProperty(classificationProperty, expand=false) {
-        if (classificationProperty) {
-          if ('propertyNamespaceUri' in classificationProperty) {
-            var propertyNamespaceUri = classificationProperty.propertyNamespaceUri;
-          }
-          if ('propertySet' in classificationProperty) {
-            var propertySet = classificationProperty.propertySet;
-            var psetContent = $('#' + propertySet + 'Content');
-            if (psetContent.length == 0) {
-              var psetContainer = $('<div>')
-                .html('<div class="row" id="' + propertySet + 'Header" data-toggle="collapse" data-target="#' + propertySet + 'Content">\
-                  <h1>' + propertySet + '</h1>\
-                  <img src="../images/maximize.png">\
-                  </div>');
-              psetContent = $('<div>')
-                .addClass('collapse')
-                .prop('id', propertySet + 'Content');
-              if(expand===true){
-                psetContent.addClass('show');
-              }
-              psetContainer.append(psetContent);
-              $('#propertySetsContent').append(psetContainer);
-            }
-            if ('name' in classificationProperty) {
-              var dataType = null;
-              if ('dataType' in classificationProperty) {
-                var dataType = classificationProperty.dataType;
-              }
-              var name = 'property___' + propertySet + '___' + classificationProperty.name.replace(/[^a-z0-9 _-]/gi, '-') + '___' + dataType;
-              var propertyContainer = $('#' + name);
-              if (propertyContainer.length == 0) {
-                propertyContainer = $('<div>')
-                  .prop('id', name)
-                  .addClass('form-group row section show')
-                  .append($('<label for="name" class="col-3 col-form-label">').html(classificationProperty.name));
-                psetContent.append(propertyContainer);
-                var inputContainer = $('<div>');
-                inputContainer.addClass('row col-9');
-                var input = $('<input>')
-                  .prop('name', name)
-                  .addClass('form-control');
-                var indeterminate = true;
-                if ('predefinedValue' in classificationProperty) {
-                  var predefinedValue = classificationProperty.predefinedValue;
-                  switch (predefinedValue) {
-                    case 'TRUE':
-                      input.prop('checked', true);
-                      input.val(true);
-                      indeterminate = false;
-                      break;
-                    case 'FALSE':
-                      input.prop('checked', false);
-                      input.val(false);
-                      indeterminate = false;
-                      break;
-                    default:
-                      input.val(predefinedValue);
-                  }
-                  input.prop('disabled', 'disabled');
-                  input.prop('readonly', true);
-                }
-                if(expand===true && recursive_setting===true){
-                  input.addClass('highlight');
-                }               
-                
-                if ('IsRequired' in classificationProperty) {
-                    input.prop('required', true);
-                }
-                switch (classificationProperty.dataType) {
-                  case 'Boolean':
-                    input.prop('type', 'checkbox');                    
-                    input.addClass('form-check-input');
-                    if (indeterminate) {
-                      input.prop('indeterminate', true);
-                    }
-                    break;
-                  case 'String':
-                    input.prop('type', 'text');
-                    break;
-                  default:
-                    // console.log(classificationProperty.dataType);
-                    input.prop('type', 'text');
-                }
-                inputContainer.append(input);
-                // propertyContainer.append($('<div class="col-9"><input type="text" class="form-control" id="name" value="" autocomplete="off"></div>'));
-                propertyContainer.append(inputContainer);
-    
-                // .html('<div class="col-9"><input type="text" class="form-control" id="name" value="" autocomplete="off"></div>');
-              }
-            }
-          }
-          // addProperty(propertySet, name, value)
-        }
-        // propertySetsContent
-        //$('#parent').append($('<div>').html('<div class="row"><h1>CPset_VolkerWessels</h1></div>'));
-  
-  
-  
-        // <div>
-        //   <div class="row">
-        //     <h1>CPset_VolkerWessels</h1>
-        //     <button class="btn btn_properties" type="button">+</button>
-        //     <img src="../images/maximize.png">
-        //   </div>
-        //   <div class="form-group row section">
-        //     <label for="name" class="col-3 col-form-label">Bouwnummer:</label>
-        //     <div class="col-9">
-        //       <input type="text" class="form-control" id="name" value="" autocomplete="off">
-        //     </div>
-        //   </div>
-        // </div>
-      }
-      function setRelation(classificationRelation) {
-        if(recursive_setting === true){
-          if ('relatedClassificationUri' in classificationRelation) {
-            setClassification(classificationRelation.relatedClassificationUri, null, classificationRelation.relatedClassificationName, classificationRelation.relationType);
-          }
-        }
-      }
-      // function addProperty(propertySet, name, value){
-  
-      // }
-    </script>
-  </body>
+      return namespaceUri.split("/")[5];
+    }
+  </script>
+</body>
