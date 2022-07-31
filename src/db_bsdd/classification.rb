@@ -64,7 +64,7 @@ module DigiBase
           schema_path = File.join('Schemas',@domain_name)
           skc_path = File.join(PLUGIN_PATH_CLASSIFICATIONS, @domain_name + '.skc')
 
-          Zip::OutputStream.open(skc_path) do |zos|
+          BimTools::Zip::OutputStream.open(skc_path) do |zos|
             zos.put_next_entry(schema_path)
             zos.puts response.body
           

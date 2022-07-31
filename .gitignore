@@ -52,5 +52,3 @@ build-iPhoneSimulator/
 /www*
 *.skc
 *.rbz
-
-/src/db_bsdd/lib*

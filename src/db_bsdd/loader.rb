@@ -55,13 +55,13 @@ module DigiBase
     PLUGIN_PATH_UI = File.join(PLUGIN_PATH, 'ui')
     PLUGIN_PATH_TOOLS = File.join(PLUGIN_PATH, 'tools')
     PLUGIN_PATH_CLASSIFICATIONS = File.join(PLUGIN_PATH, 'classifications')
-
-    # Set the path to the correct Rubyzip version for this Ruby version
-    PLUGIN_ZIP_PATH = if RUBY_VERSION.split('.')[1].to_i < 4
-                        File.join(PLUGIN_PATH, 'lib', 'rubyzip-1.3.0')
-                      else
-                        File.join(PLUGIN_PATH, 'lib', 'rubyzip-2.3.2')
-                      end
+    
+    # Set the path to the correct Rubyzip version for this Ruby version 
+    if RUBY_VERSION.split('.')[1].to_i < 4
+      PLUGIN_ZIP_PATH = File.join(PLUGIN_PATH, 'lib','rubyzip-1.3.0')
+    else
+      PLUGIN_ZIP_PATH = File.join(PLUGIN_PATH, 'lib','rubyzip')
+    end
 
     require File.join(PLUGIN_PATH, 'auth.rb')
     require File.join(PLUGIN_PATH, 'window.rb')
