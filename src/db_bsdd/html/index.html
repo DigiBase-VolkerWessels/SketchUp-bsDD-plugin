@@ -13,6 +13,7 @@
 
 <body>
   <form id="bSDD_form" style="display: flex;flex-direction: column;overflow:hidden">
+    <input type="hidden" name="ifcType" id="ifcType" value="">
     <input type="hidden" name="name" id="name" value="">
     <input type="hidden" name="material" id="material" value="">
     <div class="container-fluid">
@@ -158,11 +159,12 @@
     $('#bSDD').on('select2:select', function (e) {
       $('#propertySetsContent').html('');
       $('#ClassificationsContent').html('');
-      $('#material').val('');
+      $('#ifcType').val('');
       $('#name').val('');
-      $('#ifc2x3').html('');
-      material = false;
+      $('#material').val('');
+      ifcType = false;
       name = false;
+      material = false;
       var data = e.params.data;
       setClassification(data.id, true)
     });
@@ -252,18 +254,26 @@
         $('#ClassificationsContent').append(classificationContainer);
       }
 
+      if (domainName == 'ifc-4.3') {
+        if (!ifcType) {
+          ifcType = true;
+          classificationLabel.append($('<img src="../images/ifc.svg" style="float:right;margin" title="IFC classification: Object IFC entity type is replaced by this IFC entity">'));
+          $('#ifcType').val(classificationName);
+        } else {
+          classificationLabel.append($('<img src="../images/ifc.svg" style="filter:grayscale(100%);filter:brightness(1000%);filter:contrast(10%);float:right" title="Additional IFC classification: NOT added as Sketchup IFC entity type">'))
+        }
+      }
+
       if (relationType == 'HasMaterial') {
         if (!material) {
           material = true;
-          classificationLabel.append($('<img src="../images/material.svg" style="float:right" title="Material classification: in addition to being added as a classification, it is also added as a material">'));
+          classificationLabel.append($('<img src="../images/material.svg" style="float:right;margin" title="Material classification: in addition to being added as a classification, it is also added as a material">'));
           $('#material').val(classificationName);
-        } else if (material) {
+        } else {
           classificationLabel.append($('<img src="../images/material.svg" style="filter:grayscale(100%);filter:brightness(1000%);filter:contrast(10%);float:right" title="Additional material classification: NOT added as Sketchup material">'))
         }
       }
     }
-
-
 
     // classificationName is added as backup classification name in case url is not valid
     function setClassification(namespaceUri, expand = false, classificationName = null, relationType = null) {

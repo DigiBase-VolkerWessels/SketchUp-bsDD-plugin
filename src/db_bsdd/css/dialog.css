@@ -17,6 +17,11 @@ h1, h2, h3, h4 {
   margin-top: 1rem;
   margin-bottom: 1rem;
 }
+.row  {
+  padding-left: 0 !important;
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+}
 .row img {
   height: 18px;
   margin: auto 0;

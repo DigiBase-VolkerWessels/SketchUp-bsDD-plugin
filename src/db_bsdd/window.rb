@@ -76,6 +76,7 @@ module DigiBase
       }
 
       @window.add_action_callback("save") { |action_context, form|
+        puts form
         model = Sketchup.active_model
         classifications = model.classifications
         CGI::parse(form).each_pair do |key, array_value|          
@@ -83,6 +84,12 @@ module DigiBase
             value = array_value[0]            
             key_list = key.split('___')
             case key_list[0]
+            when "ifcType"
+              unless value.empty?
+                model.selection.each do |entity|
+                  entity.definition.add_classification(BSDD::Settings::ifc_version, value)
+                end
+              end
             when "name"
               unless value.empty?
                 model.selection.each do |entity|
@@ -106,7 +113,7 @@ module DigiBase
               domain_name = key_list[1].gsub(/[^0-9A-z.\- ]/, '') # remove non filename characters
               domain_name.gsub!(/ +/,' ') # remove multiple spaces
 
-              # Don't use bSDD version of IFC, keep to the sketchup version
+              # Don't use bSDD version of IFC
               unless domain_name == 'ifc-4.3'
                 classification_name = key_list[2]
                 domain_namespace_uri = value
@@ -152,8 +159,12 @@ module DigiBase
               domain_name = key_list[1].gsub(/[^0-9A-z.\- ]/, '') # remove non filename characters
               domain_name.gsub!(/ +/,' ') # remove multiple spaces
               classification_name = key_list[2]
-              model.selection.each do |entity|
-                entity.definition.add_classification(domain_name, classification_name)
+
+              # Don't use bSDD version of IFC
+              unless domain_name == 'ifc-4.3'
+                model.selection.each do |entity|
+                  entity.definition.add_classification(domain_name, classification_name)
+                end
               end
               
             when 'property'
@@ -199,7 +210,7 @@ module DigiBase
               model.selection.each do |entity|
                 if entity.class.method_defined?(:definition)
                   definition = entity.definition              
-                  ifc_dict = definition.attribute_dictionary("IFC 2x3")
+                  ifc_dict = definition.attribute_dictionary(BSDD::Settings::ifc_version)
                   if ifc_dict
                     pset_dict = ifc_dict.attribute_dictionary(propertyset_name, true)
                     property_dict = pset_dict.attribute_dictionary(property_name, true)
@@ -221,8 +232,8 @@ module DigiBase
         classifications = model.classifications
         
         # Map mismatch in naming between SketchUp and bsDD classification
-        if domain == "IFC"
-          domain = "IFC 2x3"
+        if domain == "ifc-4.3"
+          domain = BSDD::Settings::ifc_version
         elsif domain == "NL-SfB 2005"
           domain = "NL-SfB tabel 1"
         elsif domain == "VolkerWessels Bouw & vastgoed"
@@ -296,10 +307,10 @@ module DigiBase
                     end
 
                     propertyDomainName = property["propertyDomainName"]
-                    if propertyDomainName == "IFC"
+                    if propertyDomainName == "ifc-4.3"
 
                       # Set IFC classification
-                      ifc_dict = definition.attribute_dictionary("IFC 2x3", create = true)
+                      ifc_dict = definition.attribute_dictionary(BSDD::Settings::ifc_version, create = true)
                       propertySet_dict = ifc_dict.attribute_dictionary(propertySet, create = true)
                       propertySet_dict.set_attribute(name, "attribute_type", "boolean")
                       propertySet_dict.set_attribute(name, "is_hidden", false)

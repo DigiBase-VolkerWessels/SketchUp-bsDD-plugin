@@ -30,7 +30,7 @@ module DigiBase
     module Settings
       extend self
 
-      attr_reader :window, :ready, :classifications, :recursive
+      attr_reader :window, :ready, :classifications, :recursive, :ifc_version
 
       @window = false
       @ready = false
