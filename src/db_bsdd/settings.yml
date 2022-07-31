@@ -84,4 +84,6 @@ ifc_version: IFC 2x3
 ifc_versions:
 - IFC 2x3
 - IFC 4
+ignored_domains:
+- ifc-4.3
 recursive: true

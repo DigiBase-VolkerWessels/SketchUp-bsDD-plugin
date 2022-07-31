@@ -206,12 +206,11 @@
 
       classificationName = getClassificationName(namespaceUri, classification, classificationName);
 
-
       if (toplevel === true) {
         $('#name').val(classificationName);
       }
 
-      var classificationContainerId = domainName + '___' + classificationName;
+      var classificationContainerId = getIdString([domainName, classificationName]);
       if ($('#' + classificationContainerId).length === 0) {
 
         classificationLabel = $('<label for="name" class="col-3 col-form-label">')
@@ -277,7 +276,6 @@
 
     // classificationName is added as backup classification name in case url is not valid
     function setClassification(namespaceUri, expand = false, classificationName = null, relationType = null) {
-
       $.ajax({
         url: bsddClassificationUrl,
         data: { namespaceUri: namespaceUri },
@@ -292,9 +290,8 @@
             // This code will be executed if the server returns a 503 response
             console.log('Service Unavailable (503)');
           }
-        }
-      })
-        .done(function (classification) {
+        },
+        success: function (classification) {
           addClassification(namespaceUri, classification, classificationName, relationType, toplevel = expand);
           if (classification) {
             if ('classificationProperties' in classification) {
@@ -307,13 +304,28 @@
               classification.classificationRelations.map(relation => setRelation(relation));
             }
           }
-        })
-        .fail(function (jqXHR, textStatus) {
-          console.log('Something went wrong: ' + textStatus);
-          console.log("Unable to find classification: " + namespaceUri);
-          console.log("Using fallback method");
+        },
+        error: function (jqXHR, exception) {
+          var msg = '';
+          if (jqXHR.status === 0) {
+            msg = 'Not connect.\n Verify Network.';
+          } else if (jqXHR.status == 404) {
+            msg = 'Requested page not found. [404]';
+          } else if (jqXHR.status == 500) {
+            msg = 'Internal Server Error [500].';
+          } else if (exception === 'parsererror') {
+            msg = 'Requested JSON parse failed.';
+          } else if (exception === 'timeout') {
+            msg = 'Time out error.';
+          } else if (exception === 'abort') {
+            msg = 'Ajax request aborted.';
+          } else {
+            msg = 'Uncaught Error.\n' + jqXHR.responseText;
+          }
+          console.log(msg + ": Using fallback method");
           addClassification(namespaceUri, null, classificationName, relationType);
-        });
+        }
+      });
     }
 
     function setProperty(classificationProperty, expand = false) {
@@ -344,7 +356,7 @@
             if ('dataType' in classificationProperty) {
               var dataType = classificationProperty.dataType;
             }
-            var name = 'property___' + propertySet + '___' + classificationProperty.name.replace(/[^a-z0-9 _-]/gi, '-') + '___' + dataType;
+            var name = getIdString(['property', propertySet, classificationProperty.name, dataType]);
             var propertyContainer = $('#' + name);
             if (propertyContainer.length == 0) {
               propertyContainer = $('<div>')
@@ -416,7 +428,7 @@
 
     function getClassificationName(namespaceUri, classification, classificationName) {
       if (classificationName === null) {
-        if ('name' in classification) {
+        if (classification !== undefined && classification !== null && 'name' in classification) {
           return classification.name;
         }
         else {
@@ -459,6 +471,10 @@
         }
       }
       return namespaceUri.split("/")[5];
+    }
+
+    function getIdString(idStringParts) {
+      return idStringParts.map(p => p.replace(/[^a-z0-9 _-]/gi, '-')).join("___");
     }
   </script>
 </body>

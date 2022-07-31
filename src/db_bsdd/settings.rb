@@ -30,7 +30,7 @@ module DigiBase
     module Settings
       extend self
 
-      attr_reader :window, :ready, :classifications, :recursive, :ifc_version
+      attr_reader :window, :ready, :classifications, :recursive, :ifc_version, :ignored_domains
 
       @window = false
       @ready = false
@@ -38,6 +38,7 @@ module DigiBase
       @default_ifc_version = 'IFC 2x3'
       @ifc_version = @default_ifc_version
       @ifc_versions = ['IFC 2x3', 'IFC 4']
+      @ignored_domains = ['ifc-4.3']
       @settings_file = File.join(PLUGIN_PATH, 'settings.yml')
       @classifications = {}
       @window_options = {
@@ -74,12 +75,9 @@ module DigiBase
             @classifications = settings['classifications']
           end
           @ifc_version = settings['ifc_version'] if settings.key?('ifc_version')
-          if settings.key?('ifc_versions')
-            @active_ifc_versions = settings['ifc_versions']
-          end
-          if settings.key?('recursive')
-            @recursive = settings['recursive']
-          end
+          @ignored_domains = settings['ignored_domains'] if settings.key?('ignored_domains')          
+          @active_ifc_versions = settings['ifc_versions'] if settings.key?('ifc_versions')
+          @recursive = settings['recursive'] if settings.key?('recursive')
         end
         set_ifc_version
       rescue StandardError
@@ -121,6 +119,7 @@ module DigiBase
             'classifications' => @classifications,
             'ifc_version' => @ifc_version,
             'ifc_versions' => ifc_versions,
+            'ignored_domains' => @ignored_domains,
             'recursive' => @recursive
           }.to_yaml) }
           close

@@ -114,7 +114,7 @@ module DigiBase
               domain_name.gsub!(/ +/,' ') # remove multiple spaces
 
               # Don't use bSDD version of IFC
-              unless domain_name == 'ifc-4.3'
+              unless BSDD::Settings::ignored_domains.include? domain_name
                 classification_name = key_list[2]
                 domain_namespace_uri = value
                 # Check if classification is loaded, otherwise load it
@@ -161,7 +161,7 @@ module DigiBase
               classification_name = key_list[2]
 
               # Don't use bSDD version of IFC
-              unless domain_name == 'ifc-4.3'
+              unless BSDD::Settings::ignored_domains.include? domain_name
                 model.selection.each do |entity|
                   entity.definition.add_classification(domain_name, classification_name)
                 end
@@ -230,15 +230,6 @@ module DigiBase
       @window.add_action_callback("set_classification") { |action_context, classification, domain, properties, relations=[], namespaceUri|
         model = Sketchup.active_model
         classifications = model.classifications
-        
-        # Map mismatch in naming between SketchUp and bsDD classification
-        if domain == "ifc-4.3"
-          domain = BSDD::Settings::ifc_version
-        elsif domain == "NL-SfB 2005"
-          domain = "NL-SfB tabel 1"
-        elsif domain == "VolkerWessels Bouw & vastgoed"
-          domain = "VolkerWessels Bouw en vastgoed"
-        end
 
         # Check if classification is loaded, otherwise load it
         unless classifications[domain]
@@ -278,7 +269,6 @@ module DigiBase
                 material = model.materials.add(material_name)
                 material.color = 'DarkGray'
               end
-
               Sketchup.active_model.selection.each do |entity|
                 entity.material = material
               end
