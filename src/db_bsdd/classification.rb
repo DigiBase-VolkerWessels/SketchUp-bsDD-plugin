@@ -24,7 +24,7 @@
 
 module DigiBase
   module BSDD
-    require File.join(PLUGIN_ZIP_PATH, 'zip.rb')
+    require File.join(PLUGIN_ZIP_PATH, 'zip.rb') unless defined? BimTools::Zip
     class Classification
       BASE_URL = "https://test.bsdd.buildingsmart.org/"
       ENDPOINT = BASE_URL + "api/RequestExportFile/preview"
