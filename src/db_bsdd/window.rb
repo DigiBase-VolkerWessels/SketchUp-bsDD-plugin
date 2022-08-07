@@ -26,7 +26,6 @@ require 'cgi'
 
 module DigiBase
  module BSDD
-  require File.join(PLUGIN_PATH, 'observers.rb')
   require File.join(PLUGIN_PATH, 'classification.rb')
   require File.join(PLUGIN_PATH, 'settings.rb')
 
@@ -49,9 +48,6 @@ module DigiBase
     def create()
       @form_elements = Array.new
       @window = UI::HtmlDialog.new( @window_options )
-      @window.set_on_closed {
-        BSDD::Observers.stop
-      }
 
       @window.add_action_callback("token") { |action_context|
         token = BSDD::authentication.token
@@ -325,7 +321,6 @@ module DigiBase
     end # def create
 
     def close
-      BSDD::Observers.stop
       if @window
         @window.close
       end
@@ -333,7 +328,6 @@ module DigiBase
 
     # show Sketchup HtmlDialog window
     def show
-      BSDD::Observers.start
       self.create()
       self.set_html
       unless @window.visible?
