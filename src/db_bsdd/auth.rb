@@ -44,25 +44,21 @@ module DigiBase
       def token
         @token || authenticate
       end
-      
+
       private
 
       def authenticate
-        # begin
         @server = TCPServer.new 0
         @redirect_uri = "http://localhost:#{@server.addr[1]}"
         @state = SecureRandom.uuid
 
-        code = get_authorization_code()
+        code = get_authorization_code
         @token = get_token(code)
-        return @token
-
-        # rescue
-        #   return false
-        # end
+      rescue StandardError
+        false
       end
 
-      def get_authorization_code()
+      def get_authorization_code
         uri = URI(AUTH_CODE_URI)
         uri.query = URI.encode_www_form(
           {
@@ -79,16 +75,16 @@ module DigiBase
         # https://stackoverflow.com/questions/14250517/making-a-timer-in-ruby
         listen = Thread.new do
           loop do
-            client = @server.accept       # Wait for a client to connect
+            client = @server.accept # Wait for a client to connect
             method, path = client.gets.split
             Thread.current[:value] = Hash[URI.decode_www_form(path.split('?')[1])]
-            resp = "Logged into buildingSMART Data Dictionary, you may now close this window.<script>window.close()</script>"
+            resp = 'Logged into buildingSMART Data Dictionary, you may now close this window.<script>window.close()</script>'
             headers = ['http/1.1 200 ok',
                        "date: #{Time.now.httpdate}",
                        'server: ruby',
                        'content-type: text/html; charset=iso-8859-1',
                        "content-length: #{resp.length}\r\n\r\n"].join("\r\n")
-            client.puts headers          # send the time to the client
+            client.puts headers # send the time to the client
             client.puts resp
             client.close
             break
@@ -102,7 +98,7 @@ module DigiBase
         end
         join = listen.join
 
-        return listen[:value]['code']
+        listen[:value]['code']
       end
 
       def get_token(code)
@@ -113,7 +109,7 @@ module DigiBase
         body = {
           'grant_type' => 'authorization_code',
           'client_id' => CLIENT_ID,
-          'scope' => "https://buildingsmartservices.onmicrosoft.com/api/read offline_access",
+          'scope' => 'https://buildingsmartservices.onmicrosoft.com/api/read offline_access',
           'code' => code,
           'redirect_uri' => @redirect_uri,
           'code_verifier' => @state
@@ -127,7 +123,7 @@ module DigiBase
 
         # Send the request
         response = http.request(request)
-        return JSON.parse(response.body)['access_token']
+        JSON.parse(response.body)['access_token']
       end
     end
   end

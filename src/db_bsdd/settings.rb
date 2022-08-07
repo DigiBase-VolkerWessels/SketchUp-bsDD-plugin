@@ -39,7 +39,7 @@ module DigiBase
       @ifc_version = @default_ifc_version
       @ifc_versions = ['IFC 2x3', 'IFC 4']
       @ignored_domains = ['ifc-4.3']
-      @test_environment = false;
+      @test_environment = false
       @settings_file = File.join(PLUGIN_PATH, 'settings.yml')
       @classifications = {}
       @window_options = {
@@ -56,15 +56,13 @@ module DigiBase
         if @active_ifc_versions.count == 0
           unless classifications[@default_ifc_version]
             file = Sketchup.find_support_file('IFC 2x3.skc', 'Classifications')
-            classifications.load_schema(file) if !file.nil?
+            classifications.load_schema(file) unless file.nil?
           end
           @active_ifc_versions = [@default_ifc_version]
         end
-        unless @active_ifc_versions.include? @ifc_version
-          @ifc_version = @active_ifc_versions.first
-        end
+        @ifc_version = @active_ifc_versions.first unless @active_ifc_versions.include? @ifc_version
       rescue StandardError
-        message = "Unable to set IFC version"
+        message = 'Unable to set IFC version'
         puts message
         notification = UI::Notification.new(BSDD_EXTENSION, message)
         notification.show
@@ -72,9 +70,7 @@ module DigiBase
 
       def load
         if settings = YAML.safe_load(File.read(@settings_file))
-          if settings.key?('classifications')
-            @classifications = settings['classifications']
-          end
+          @classifications = settings['classifications'] if settings.key?('classifications')
           @ifc_version = settings['ifc_version'] if settings.key?('ifc_version')
           @ignored_domains = settings['ignored_domains'] if settings.key?('ignored_domains')
           @test_environment = settings['test_environment'] if settings.key?('test_environment')
@@ -121,14 +117,16 @@ module DigiBase
           @test_environment = settings['test_environment']
           ifc_versions = @ifc_versions.union(@active_ifc_versions)
           @ifc_version = settings['ifcVersion']
-          File.open(@settings_file, 'w') { |f| f.write({
-            'classifications' => @classifications,
-            'ifc_version' => @ifc_version,
-            'ifc_versions' => ifc_versions,
-            'ignored_domains' => @ignored_domains,
-            'test_environment' => @test_environment,
-            'recursive' => @recursive
-          }.to_yaml) }
+          File.open(@settings_file, 'w') do |f|
+            f.write({
+              'classifications' => @classifications,
+              'ifc_version' => @ifc_version,
+              'ifc_versions' => ifc_versions,
+              'ignored_domains' => @ignored_domains,
+              'test_environment' => @test_environment,
+              'recursive' => @recursive
+            }.to_yaml)
+          end
           close
           DigiBase::BSDD::PropertiesWindow.close
         end

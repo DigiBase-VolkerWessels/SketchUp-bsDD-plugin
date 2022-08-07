@@ -22,11 +22,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
 # Create an entry in the Extension list that loads a script called
 # loader.rb.
-require 'sketchup.rb'
-require 'extensions.rb'
+require 'sketchup'
+require 'extensions'
 
 module DigiBase
   PLUGIN_ROOT_PATH = File.dirname(__FILE__) unless defined? PLUGIN_ROOT_PATH
@@ -35,21 +34,21 @@ module DigiBase
     unless file_loaded?(__FILE__)
 
       # Version and release information.
-      VERSION = '2.0.0'.freeze
+      VERSION = '2.0.0'
 
-      if  Sketchup.version_number>1700000000
+      if Sketchup.version_number > 1_700_000_000
         PLUGIN_PATH       = File.join(PLUGIN_ROOT_PATH, 'db_bsdd')
         PLUGIN_IMAGE_PATH = File.join(PLUGIN_PATH, 'images')
 
-        BSDD_EXTENSION = SketchupExtension.new("DigiBase bSDD classification tool", File.join(PLUGIN_PATH, 'loader.rb'))
+        BSDD_EXTENSION = SketchupExtension.new('DigiBase bSDD classification tool', File.join(PLUGIN_PATH, 'loader.rb'))
         BSDD_EXTENSION.version = VERSION
         BSDD_EXTENSION.description = 'Add classifications and properties from the BuildingSMART Data Dictionary to IFC objects.'
         BSDD_EXTENSION.creator = 'DigiBase'
         BSDD_EXTENSION.copyright = '2022'
         Sketchup.register_extension(BSDD_EXTENSION, true)
       else
-        UI.messagebox "You need at least SketchUp 2017 to use this extension."
+        UI.messagebox 'You need at least SketchUp 2017 to use this extension.'
       end
     end
-  end # module BSDD
-end # module DigiBase
+  end
+end

@@ -64,7 +64,6 @@ module DigiBase
       PLUGIN_PATH_CLASSIFICATIONS = File.join(PLUGIN_PATH, 'classifications')
       FileUtils.mkdir_p(PLUGIN_PATH_CLASSIFICATIONS) unless File.directory?(PLUGIN_PATH_CLASSIFICATIONS)
     end
-    puts PLUGIN_PATH_CLASSIFICATIONS
 
     # Set the path to the correct Rubyzip version for this Ruby version
     PLUGIN_ZIP_PATH = if RUBY_VERSION.split('.')[1].to_i < 4
@@ -107,5 +106,5 @@ module DigiBase
     @toolbar.add_item btn_settings_window
     @toolbar.add_item btn_bsdd_window
     @toolbar.show
-  end # module BSDD
-end # module DigiBase
+  end
+end
