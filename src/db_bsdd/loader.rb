@@ -24,6 +24,8 @@
 
 # Main loader for bSDD plugin
 
+require 'fileutils'
+
 module DigiBase
   module BSDD
     attr_reader :toolbar, :authentication
@@ -54,14 +56,22 @@ module DigiBase
     PLUGIN_PATH_LIB = File.join(PLUGIN_PATH, 'lib')
     PLUGIN_PATH_UI = File.join(PLUGIN_PATH, 'ui')
     PLUGIN_PATH_TOOLS = File.join(PLUGIN_PATH, 'tools')
-    PLUGIN_PATH_CLASSIFICATIONS = File.join(PLUGIN_PATH, 'classifications')
-    
-    # Set the path to the correct Rubyzip version for this Ruby version 
-    if RUBY_VERSION.split('.')[1].to_i < 4
-      PLUGIN_ZIP_PATH = File.join(PLUGIN_PATH, 'lib','rubyzip-1.3.0')
+
+    classification_files = Sketchup.find_support_files('skc', 'Classifications')
+    if classification_files.length > 0
+      PLUGIN_PATH_CLASSIFICATIONS = File.join(File.dirname(classification_files[0]))
     else
-      PLUGIN_ZIP_PATH = File.join(PLUGIN_PATH, 'lib','rubyzip')
+      PLUGIN_PATH_CLASSIFICATIONS = File.join(PLUGIN_PATH, 'classifications')
+      FileUtils.mkdir_p(PLUGIN_PATH_CLASSIFICATIONS) unless File.directory?(PLUGIN_PATH_CLASSIFICATIONS)
     end
+    puts PLUGIN_PATH_CLASSIFICATIONS
+
+    # Set the path to the correct Rubyzip version for this Ruby version
+    PLUGIN_ZIP_PATH = if RUBY_VERSION.split('.')[1].to_i < 4
+                        File.join(PLUGIN_PATH, 'lib', 'rubyzip-1.3.0')
+                      else
+                        File.join(PLUGIN_PATH, 'lib', 'rubyzip')
+                      end
 
     require File.join(PLUGIN_PATH, 'auth.rb')
     require File.join(PLUGIN_PATH, 'window.rb')
@@ -71,7 +81,7 @@ module DigiBase
 
     # Load settings from yaml file
     require File.join(PLUGIN_PATH, 'settings.rb')
-    Settings.load()
+    Settings.load
 
     # Create authenticator
     @authentication = Authentication.new
