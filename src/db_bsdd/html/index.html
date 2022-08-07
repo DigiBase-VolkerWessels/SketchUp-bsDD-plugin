@@ -52,6 +52,7 @@
   </form>
   </div>
   <script>
+    var ifc_domain = 'ifc-4.3';
     var environment = 'production';
     var domainNamespaceUris = "[]";
     var recursive_setting = false;
@@ -127,7 +128,6 @@
 
     $("#bSDD_form").on("submit", function (event) {
       event.preventDefault();
-      console.log($(this).serialize());
     });
 
     $("#material").change(function () {
@@ -139,7 +139,6 @@
     $("#layer").change(function () {
       var value = $(this).val();
       if (value != compare_material) {
-        console.log('layer changed');
         sketchup.layer(value);
       }
     });
@@ -227,7 +226,6 @@
           .prop('id', classificationContainerId);
         var inputContainer = $('<div>');
         inputContainer.addClass('row col-9');
-
         if (classification !== null && classification !== undefined && classification.domainNamespaceUri !== undefined) {
           var inputHidden = $('<input>');
           inputHidden.prop('name', 'domain___' + domainName + '___' + classificationName);
@@ -235,10 +233,8 @@
           inputHidden.val(classification.domainNamespaceUri);
           inputContainer.append(inputHidden);
         }
-
         classificationContainer.append(inputContainer);
 
-        console.log(domainName);
         var input = $('<input>');
         input.addClass('form-control');
         if (recursive_setting === true) {
@@ -256,25 +252,25 @@
         inputContainer.append(input);
 
         $('#ClassificationsContent').append(classificationContainer);
-      }
 
-      if (domainName == 'ifc-4.3') {
-        if (!ifcType) {
-          ifcType = true;
-          classificationLabel.append($('<img src="../images/ifc.svg" style="float:right;margin" title="IFC classification: Object IFC entity type is replaced by this IFC entity">'));
-          $('#ifcType').val(classificationName);
-        } else {
-          classificationLabel.append($('<img src="../images/ifc.svg" style="filter:grayscale(100%);filter:brightness(1000%);filter:contrast(10%);float:right" title="Additional IFC classification: NOT added as Sketchup IFC entity type">'))
+        if (domainName === ifc_domain) {
+          if (!ifcType) {
+            ifcType = true;
+            classificationLabel.append($('<img src="../images/ifc.svg" style="float:right;margin" title="IFC classification: Object IFC entity type is replaced by this IFC entity">'));
+            $('#ifcType').val(classificationName);
+          } else {
+            classificationLabel.append($('<img src="../images/ifc.svg" style="filter:grayscale(100%);filter:brightness(1000%);filter:contrast(10%);float:right" title="Additional IFC classification: NOT added as Sketchup IFC entity type">'))
+          }
         }
-      }
 
-      if (relationType == 'HasMaterial') {
-        if (!material) {
-          material = true;
-          classificationLabel.append($('<img src="../images/material.svg" style="float:right;margin" title="Material classification: in addition to being added as a classification, it is also added as a material">'));
-          $('#material').val(classificationName);
-        } else {
-          classificationLabel.append($('<img src="../images/material.svg" style="filter:grayscale(100%);filter:brightness(1000%);filter:contrast(10%);float:right" title="Additional material classification: NOT added as Sketchup material">'))
+        if (relationType === 'HasMaterial') {
+          if (!material) {
+            material = true;
+            classificationLabel.append($('<img src="../images/material.svg" style="float:right;margin" title="Material classification: in addition to being added as a classification, it is also added as a material">'));
+            $('#material').val(classificationName);
+          } else {
+            classificationLabel.append($('<img src="../images/material.svg" style="filter:grayscale(100%);filter:brightness(1000%);filter:contrast(10%);float:right" title="Additional material classification: NOT added as Sketchup material">'))
+          }
         }
       }
     }
@@ -425,7 +421,6 @@
     function setRelation(classificationRelation) {
       if (recursive_setting === true) {
         if ('relatedClassificationUri' in classificationRelation) {
-          console.log(classificationRelation.relationType);
           setClassification(classificationRelation.relatedClassificationUri, null, classificationRelation.relatedClassificationName, classificationRelation.relationType);
         }
       }
