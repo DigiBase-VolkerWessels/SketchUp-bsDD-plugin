@@ -112,17 +112,27 @@
       });
     });
 
+    /**
+     * Catch form submit, serialize and send to sketchup save
+     */
     $("#bSDD_form").on("submit", function (event) {
       event.preventDefault();
 
-      // Add disabled form elements
+      // Temporarily enable disabled form elements
       var disabled = $(this).find(':input:disabled').removeAttr('disabled');
-
-      // serialize the form
       var formData = $(this).serialize();
-
-      // re-disabled the set of inputs that you previously enabled
       disabled.attr('disabled', 'disabled');
+
+      // include unchecked checkboxes but skip undeterminate
+      $.each($('#bSDD_form input[type=checkbox]')
+        .filter(function (idx) {
+          return (($(this).prop('checked') === false) && ($(this).prop('indeterminate') !== true));
+        }),
+        function (idx, el) {
+          var emptyVal = false;
+          formData += '&' + $(el).attr('name') + '=' + emptyVal;
+        }
+      );
       sketchup.save(formData);
     });
 
