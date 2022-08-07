@@ -36,7 +36,7 @@ module DigiBase
     PLATFORM_IS_WINDOWS = !PLATFORM_IS_OSX
 
     # set icon file type
-    if Sketchup.version_number < 1_600_000_000
+    if Sketchup.version_number < 1_700_000_000
       ICON_TYPE = '.png'
       ICON_SMALL = '_small'
       ICON_LARGE = '_large'
