@@ -26,8 +26,6 @@ module DigiBase
   module BSDD
     require File.join(PLUGIN_ZIP_PATH, 'zip.rb') unless defined? BimTools::Zip
     class Classification
-      BASE_URL = 'https://test.bsdd.buildingsmart.org/'
-      ENDPOINT = BASE_URL + 'api/RequestExportFile/preview'
       def initialize(domain_name, uri, token)
         @domain_name = domain_name
         @uri = uri
@@ -35,7 +33,6 @@ module DigiBase
       end
 
       def download
-        uri = URI.parse(ENDPOINT)
         header = {
           'Content-Type': 'multipart/form-data', # 'application/x-www-form-urlencoded',#'application/json',#
           'Authorization': 'Bearer ' + @token
@@ -46,7 +43,7 @@ module DigiBase
           # 'UseNestedClassifications' => true
         }
         params = URI.encode_www_form(body)
-        uri_full = URI.parse(ENDPOINT + '?' + params)
+        uri_full = URI.parse(Settings.bsdd_api['RequestExportFile'] + '?' + params)
 
         # Create the HTTP objects
         http = Net::HTTP.new(uri_full.host, uri_full.port)

@@ -88,3 +88,11 @@ ignored_domains:
 - ifc-4.3
 test_environment: true
 recursive: true
+bsdd_environment:
+  production: https://api.bsdd.buildingsmart.org/
+  test: https://test.bsdd.buildingsmart.org/
+bsdd_endpoint:
+  classification: api/Classification/v3
+  domain: api/Domain/v2
+  textSearchListOpen: api/TextSearchListOpen/v5
+  RequestExportFile: api/RequestExportFile/preview

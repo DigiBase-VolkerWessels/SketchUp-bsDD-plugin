@@ -24,13 +24,16 @@
 
 require 'json'
 require 'yaml'
+require 'json'
 
 module DigiBase
   module BSDD
+    require File.join(PLUGIN_PATH, 'settings.rb')
     module Settings
       extend self
 
-      attr_reader :window, :ready, :classifications, :recursive, :ifc_version, :ignored_domains, :test_environment
+      attr_reader :window, :ready, :classifications, :recursive, :ifc_version, :ignored_domains, :test_environment,
+                  :bsdd_api
 
       @window = false
       @ready = false
@@ -40,6 +43,7 @@ module DigiBase
       @ifc_versions = ['IFC 2x3', 'IFC 4']
       @ignored_domains = ['ifc-4.3']
       @test_environment = false
+      @bsdd_api = {}
       @settings_file = File.join(PLUGIN_PATH, 'settings.yml')
       @classifications = {}
       @window_options = {
@@ -74,9 +78,16 @@ module DigiBase
           @ifc_version = settings['ifc_version'] if settings.key?('ifc_version')
           @ignored_domains = settings['ignored_domains'] if settings.key?('ignored_domains')
           @test_environment = settings['test_environment'] if settings.key?('test_environment')
-          @active_ifc_versions = settings['ifc_versions'] if settings.key?('ifc_versions')
+          @active_ifc_versions = if settings.key?('ifc_versions')
+                                   settings['ifc_versions']
+                                 else
+                                   @ifc_versions
+                                 end
+          @bsdd_environment = settings['bsdd_environment']
+          @bsdd_endpoint = settings['bsdd_endpoint']
           @recursive = settings['recursive'] if settings.key?('recursive')
         end
+        set_bsdd_api
         set_ifc_version
       rescue StandardError
         message = "Default settings loaded.\r\nUnable to load settings from:\r\n'#{@settings_file}'"
@@ -124,11 +135,14 @@ module DigiBase
               'ifc_versions' => ifc_versions,
               'ignored_domains' => @ignored_domains,
               'test_environment' => @test_environment,
-              'recursive' => @recursive
+              'recursive' => @recursive,
+              'bsdd_environment' => @bsdd_environment,
+              'bsdd_endpoint' => @bsdd_endpoint
             }.to_yaml)
           end
           close
           DigiBase::BSDD::PropertiesWindow.close
+          load
         end
       end
 
@@ -158,6 +172,16 @@ module DigiBase
 
       def set_html
         @window.set_url(File.join(PLUGIN_PATH_HTML, 'settings.html'))
+      end
+
+      def set_bsdd_api
+        environment_name = if @test_environment
+                             'test'
+                           else
+                             'production'
+                           end
+        environment_url = @bsdd_environment[environment_name]
+        @bsdd_api = @bsdd_endpoint.map { |k, v| [k, environment_url + v] }.to_h
       end
     end
   end
