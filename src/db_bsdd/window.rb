@@ -123,9 +123,6 @@ module DigiBase
                 # Check if classification is loaded, otherwise load it
                 unless classifications[domain_name]
                   file = File.join(PLUGIN_PATH_CLASSIFICATIONS, domain_name + '.skc')
-
-                  # If not in plugin lib folder then check support files
-                  file ||= Sketchup.find_support_file(classification + '.skc', 'Classifications')
                   if File.file?(file) && classifications.load_schema(file)
                     classifications.load_schema(file) unless file.nil?
                     message = "Classification loaded:\r\n'#{domain_name}'"
@@ -134,8 +131,7 @@ module DigiBase
                     notification.show
                   else
                     success = false
-                    token = BSDD.authentication.token
-                    if token
+                    if token = BSDD.authentication.token
                       classification = DigiBase::BSDD::Classification.new(domain_name, domain_namespace_uri, token)
                       skc_path = classification.download
                       if skc_path && File.file?(skc_path) && classifications.load_schema(skc_path)
