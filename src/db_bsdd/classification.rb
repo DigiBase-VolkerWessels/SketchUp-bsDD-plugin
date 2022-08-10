@@ -25,77 +25,108 @@
 module DigiBase
   module BSDD
     require File.join(PLUGIN_ZIP_PATH, 'zip.rb') unless defined? BimTools::Zip
+
+    # bSDD domain to sketchup classification converter
     class Classification
-      def initialize(domain_name, uri, token)
+      def initialize(domain_name, uri)
         @domain_name = domain_name
         @uri = uri
-        @token = token
       end
-
-      def download
+      
+      # Download bSDD domain as xsd
+      #
+      # @param file_path [String] file path
+      # @param token [String] OAuth Access Token
+      def download(file_path, token)
         header = {
           'Content-Type': 'multipart/form-data', # 'application/x-www-form-urlencoded',#'application/json',#
-          'Authorization': 'Bearer ' + @token
+          'Authorization': 'Bearer ' + token
         }
         body = {
           'DomainNamespaceUri' => @uri,
-          'ExportFormat' => 'Sketchup' # ,
+          'ExportFormat' => 'Sketchup'
           # 'UseNestedClassifications' => true
         }
         params = URI.encode_www_form(body)
         uri_full = URI.parse(Settings.bsdd_api['RequestExportFile'] + '?' + params)
-
-        # Create the HTTP objects
         http = Net::HTTP.new(uri_full.host, uri_full.port)
         http.use_ssl = true
         request = Net::HTTP::Post.new(uri_full, header)
-
-        # Send the request
         response = http.request(request)
+        write_skc(file_path, response.body) if response.is_a?(Net::HTTPSuccess)
+      end
+      
+      # Create sketchup skc file from xsd
+      #
+      # @param file_path [String] file path
+      # @param xsd [String] XSD data
+      def write_skc(file_path, xsd)
+        schema_path = File.join('Schemas', @domain_name)
+        BimTools::Zip::OutputStream.open(file_path) do |zos|
+          zos.put_next_entry(schema_path)
+          zos.puts xsd
 
-        if response.is_a?(Net::HTTPSuccess)
-          schema_path = File.join('Schemas', @domain_name)
-          skc_path = File.join(PLUGIN_PATH_CLASSIFICATIONS, @domain_name + '.skc')
+          zos.put_next_entry('document.xml')
+          zos.puts <<~DOC
+            <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+            <classificationDocument xmlns="http://www.sketchup.com/schemas/sketchup/1.0/classification" xmlns:r="http://www.sketchup.com/schemas/1.0/references" xmlns:cls="http://www.sketchup.com/schemas/sketchup/1.0/classification" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sketchup.com/schemas/sketchup/1.0/classification http://www.sketchup.com/schemas/sketchup/1.0/classification.xsd">
+              <cls:Classification xsdFile="#{schema_path}"></cls:Classification>
+            </classificationDocument>
+          DOC
 
-          BimTools::Zip::OutputStream.open(skc_path) do |zos|
-            zos.put_next_entry(schema_path)
-            zos.puts response.body
+          zos.put_next_entry('documentProperties.xml')
+          zos.puts <<~DOC
+            <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+            <documentProperties xmlns="http://www.sketchup.com/schemas/1.0/documentproperties" xmlns:dp="http://www.sketchup.com/schemas/1.0/documentproperties" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sketchup.com/schemas/1.0/documentproperties http://www.sketchup.com/schemas/1.0/documentproperties.xsd">
+              <dp:title>#{@domain_name}</dp:title>
+              <dp:description>Demo definitie</dp:description>
+              <dp:creator></dp:creator>
+              <dp:keywords></dp:keywords>
+              <dp:lastModifiedBy></dp:lastModifiedBy>
+              <dp:revision>1</dp:revision>
+              <dp:created>2022-02-03T14:28:00</dp:created>
+              <dp:modified>2022-02-03T14:28:00</dp:modified>
+              <dp:thumbnail></dp:thumbnail>
+              <dp:generator dp:name="Classification" dp:version="1"/>
+            </documentProperties>
+          DOC
 
-            zos.put_next_entry('document.xml')
-            zos.puts <<~DOC
-              <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-              <classificationDocument xmlns="http://www.sketchup.com/schemas/sketchup/1.0/classification" xmlns:r="http://www.sketchup.com/schemas/1.0/references" xmlns:cls="http://www.sketchup.com/schemas/sketchup/1.0/classification" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sketchup.com/schemas/sketchup/1.0/classification http://www.sketchup.com/schemas/sketchup/1.0/classification.xsd">
-                <cls:Classification xsdFile="#{schema_path}"></cls:Classification>
-              </classificationDocument>
-            DOC
-
-            zos.put_next_entry('documentProperties.xml')
-            zos.puts <<~DOC
-              <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-              <documentProperties xmlns="http://www.sketchup.com/schemas/1.0/documentproperties" xmlns:dp="http://www.sketchup.com/schemas/1.0/documentproperties" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sketchup.com/schemas/1.0/documentproperties http://www.sketchup.com/schemas/1.0/documentproperties.xsd">
-                <dp:title>#{@domain_name}</dp:title>
-                <dp:description>Demo definitie</dp:description>
-                <dp:creator></dp:creator>
-                <dp:keywords></dp:keywords>
-                <dp:lastModifiedBy></dp:lastModifiedBy>
-                <dp:revision>1</dp:revision>
-                <dp:created>2022-02-03T14:28:00</dp:created>
-                <dp:modified>2022-02-03T14:28:00</dp:modified>
-                <dp:thumbnail></dp:thumbnail>
-                <dp:generator dp:name="Classification" dp:version="1"/>
-              </documentProperties>
-            DOC
-
-            zos.put_next_entry('references.xml')
-            zos.puts <<~DOC
-              <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-              <references xmlns="http://www.sketchup.com/schemas/1.0/references" xmlns:r="http://www.sketchup.com/schemas/1.0/references" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sketchup.com/schemas/1.0/references http://www.sketchup.com/schemas/1.0/references.xsd"/>
-            DOC
-          end
-          return skc_path
-
+          zos.put_next_entry('references.xml')
+          zos.puts <<~DOC
+            <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+            <references xmlns="http://www.sketchup.com/schemas/1.0/references" xmlns:r="http://www.sketchup.com/schemas/1.0/references" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sketchup.com/schemas/1.0/references http://www.sketchup.com/schemas/1.0/references.xsd"/>
+          DOC
         end
-        false
+      end
+
+      # Check if classification is loaded, otherwise load it
+      #
+      # @param model [Sketchup::Model] Sketchup model to load classifications
+      def load(model)
+        classifications = model.classifications
+        if classifications[@domain_name]
+          log_info("Classification already loaded:\r\n'#{@domain_name}'")
+        else
+          file_path = File.join(PLUGIN_PATH_CLASSIFICATIONS, @domain_name + '.skc')
+          if classifications.load_schema(file_path)
+            log_info("Classification loaded from disk:\r\n'#{@domain_name}'")
+          elsif token = BSDD.authentication.token
+            download(file_path, token)
+            if classifications.load_schema(file_path)
+              log_info("Classification loaded from bSDD:\r\n'#{@domain_name}'")
+            else
+              log_info("Unable to load classification:\r\n'#{domain_name}'")
+            end
+          end
+        end
+      end
+
+      # Log info message
+      #
+      # @param message [SString] Log message
+      def log_info(message)
+        puts message
+        UI::Notification.new(BSDD_EXTENSION, message).show
       end
     end
   end

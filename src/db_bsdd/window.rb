@@ -82,7 +82,6 @@ module DigiBase
 
         @window.add_action_callback('save') do |_action_context, form|
           model = Sketchup.active_model
-          classifications = model.classifications
           CGI.parse(form).each_pair do |key, array_value|
             next unless array_value[0] != ''
 
@@ -120,37 +119,8 @@ module DigiBase
               unless BSDD::Settings.ignored_domains.include? domain_name
                 classification_name = key_list[2]
                 domain_namespace_uri = value
-                # Check if classification is loaded, otherwise load it
-                unless classifications[domain_name]
-                  file = File.join(PLUGIN_PATH_CLASSIFICATIONS, domain_name + '.skc')
-                  if File.file?(file) && classifications.load_schema(file)
-                    classifications.load_schema(file) unless file.nil?
-                    message = "Classification loaded:\r\n'#{domain_name}'"
-                    puts message
-                    notification = UI::Notification.new(BSDD_EXTENSION, message)
-                    notification.show
-                  else
-                    success = false
-                    if token = BSDD.authentication.token
-                      classification = DigiBase::BSDD::Classification.new(domain_name, domain_namespace_uri, token)
-                      skc_path = classification.download
-                      if skc_path && File.file?(skc_path) && classifications.load_schema(skc_path)
-                        classifications.load_schema(file) unless file.nil?
-                        message = "Classification loaded:\r\n'#{domain_name}'"
-                        puts message
-                        success = true
-                        notification = UI::Notification.new(BSDD_EXTENSION, message)
-                        notification.show
-                      end
-                    end
-                    unless success
-                      message = "Unable to load classification:\r\n'#{domain_name}'"
-                      puts message
-                      notification = UI::Notification.new(BSDD_EXTENSION, message)
-                      notification.show
-                    end
-                  end
-                end
+                classification = DigiBase::BSDD::Classification.new(domain_name, domain_namespace_uri)
+                classification.load(model)
               end
             when 'classification'
               domain_name = key_list[1].gsub(/[^0-9A-z.\- ]/, '') # remove non filename characters
