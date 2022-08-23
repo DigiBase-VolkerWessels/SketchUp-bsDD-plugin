@@ -147,7 +147,7 @@ module DigiBase
       end
 
       def close
-        @window&.close
+        @window.close if @window
       end
 
       def show

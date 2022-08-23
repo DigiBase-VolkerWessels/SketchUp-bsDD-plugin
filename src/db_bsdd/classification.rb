@@ -67,34 +67,34 @@ module DigiBase
           zos.puts xsd
 
           zos.put_next_entry('document.xml')
-          zos.puts <<~DOC
-            <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-            <classificationDocument xmlns="http://www.sketchup.com/schemas/sketchup/1.0/classification" xmlns:r="http://www.sketchup.com/schemas/1.0/references" xmlns:cls="http://www.sketchup.com/schemas/sketchup/1.0/classification" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sketchup.com/schemas/sketchup/1.0/classification http://www.sketchup.com/schemas/sketchup/1.0/classification.xsd">
-              <cls:Classification xsdFile="#{schema_path}"></cls:Classification>
-            </classificationDocument>
+          zos.puts <<-DOC
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<classificationDocument xmlns="http://www.sketchup.com/schemas/sketchup/1.0/classification" xmlns:r="http://www.sketchup.com/schemas/1.0/references" xmlns:cls="http://www.sketchup.com/schemas/sketchup/1.0/classification" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sketchup.com/schemas/sketchup/1.0/classification http://www.sketchup.com/schemas/sketchup/1.0/classification.xsd">
+  <cls:Classification xsdFile="#{schema_path}"></cls:Classification>
+</classificationDocument>
           DOC
 
           zos.put_next_entry('documentProperties.xml')
-          zos.puts <<~DOC
-            <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-            <documentProperties xmlns="http://www.sketchup.com/schemas/1.0/documentproperties" xmlns:dp="http://www.sketchup.com/schemas/1.0/documentproperties" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sketchup.com/schemas/1.0/documentproperties http://www.sketchup.com/schemas/1.0/documentproperties.xsd">
-              <dp:title>#{@domain_name}</dp:title>
-              <dp:description>Demo definitie</dp:description>
-              <dp:creator></dp:creator>
-              <dp:keywords></dp:keywords>
-              <dp:lastModifiedBy></dp:lastModifiedBy>
-              <dp:revision>1</dp:revision>
-              <dp:created>2022-02-03T14:28:00</dp:created>
-              <dp:modified>2022-02-03T14:28:00</dp:modified>
-              <dp:thumbnail></dp:thumbnail>
-              <dp:generator dp:name="Classification" dp:version="1"/>
-            </documentProperties>
+          zos.puts <<-DOC
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<documentProperties xmlns="http://www.sketchup.com/schemas/1.0/documentproperties" xmlns:dp="http://www.sketchup.com/schemas/1.0/documentproperties" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sketchup.com/schemas/1.0/documentproperties http://www.sketchup.com/schemas/1.0/documentproperties.xsd">
+  <dp:title>#{@domain_name}</dp:title>
+  <dp:description>Demo definitie</dp:description>
+  <dp:creator></dp:creator>
+  <dp:keywords></dp:keywords>
+  <dp:lastModifiedBy></dp:lastModifiedBy>
+  <dp:revision>1</dp:revision>
+  <dp:created>2022-02-03T14:28:00</dp:created>
+  <dp:modified>2022-02-03T14:28:00</dp:modified>
+  <dp:thumbnail></dp:thumbnail>
+  <dp:generator dp:name="Classification" dp:version="1"/>
+</documentProperties>
           DOC
 
           zos.put_next_entry('references.xml')
-          zos.puts <<~DOC
-            <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-            <references xmlns="http://www.sketchup.com/schemas/1.0/references" xmlns:r="http://www.sketchup.com/schemas/1.0/references" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sketchup.com/schemas/1.0/references http://www.sketchup.com/schemas/1.0/references.xsd"/>
+          zos.puts <<-DOC
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<references xmlns="http://www.sketchup.com/schemas/1.0/references" xmlns:r="http://www.sketchup.com/schemas/1.0/references" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sketchup.com/schemas/1.0/references http://www.sketchup.com/schemas/1.0/references.xsd"/>
           DOC
         end
       end
