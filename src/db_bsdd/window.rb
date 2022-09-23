@@ -308,7 +308,7 @@ module DigiBase
             break
           end
         end
-        @window.set_url(File.join(PLUGIN_PATH_HTML, 'index.html'))
+        @window.set_file(File.join(PLUGIN_PATH_HTML, 'index.html'))
       end
     end
   end

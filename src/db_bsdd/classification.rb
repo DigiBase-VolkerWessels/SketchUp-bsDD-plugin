@@ -115,7 +115,7 @@ module DigiBase
             if classifications.load_schema(file_path)
               log_info("Classification loaded from bSDD:\r\n'#{@domain_name}'")
             else
-              log_info("Unable to load classification:\r\n'#{domain_name}'")
+              log_info("Unable to load classification:\r\n'#{@domain_name}'")
             end
           end
         end

@@ -171,7 +171,7 @@ module DigiBase
       end
 
       def set_html
-        @window.set_url(File.join(PLUGIN_PATH_HTML, 'settings.html'))
+        @window.set_file(File.join(PLUGIN_PATH_HTML, 'settings.html'))
       end
 
       def set_bsdd_api
