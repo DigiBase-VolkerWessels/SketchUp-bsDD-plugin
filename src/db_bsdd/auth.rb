@@ -34,7 +34,7 @@ require 'json'
 module DigiBase
   module BSDD
     class Authentication
-      AUTH_BASE_URI = 'https://buildingsmartservices.b2clogin.com/buildingsmartservices.onmicrosoft.com/b2c_1a_signupsignin_c/oauth2/v2.0/'
+      AUTH_BASE_URI = 'https://authentication.buildingsmart.org/buildingsmartservices.onmicrosoft.com/b2c_1a_signupsignin_c/oauth2/v2.0/'
       AUTH_CODE_URI = AUTH_BASE_URI + 'authorize'
       AUTH_TOKEN_URI = AUTH_BASE_URI + 'token'
       CLIENT_ID = '4aba821f-d4ff-498b-a462-c2837dbbba70'
