@@ -81,6 +81,7 @@ module DigiBase
         end
 
         @window.add_action_callback('save') do |_action_context, form|
+          description = false
           model = Sketchup.active_model
           CGI.parse(form).each_pair do |key, array_value|
             next unless array_value[0] != ''
@@ -133,7 +134,12 @@ module DigiBase
                   entity.definition.add_classification(domain_name, classification_name)
                 end
               end
-
+              
+              # Set IfcDescription
+              unless description
+                description = true
+                set_attribute(model, "Description", "IfcText", "string", classification_name)
+              end
             when 'property'
               propertyset_name = key_list[1]
               property_name = key_list[2]
@@ -174,22 +180,43 @@ module DigiBase
                 value_type = 'IfcLabel'
                 attribute_type = 'string'
               end
-              model.selection.each do |entity|
-                next unless entity.class.method_defined?(:definition)
-
-                definition = entity.definition
-                ifc_dict = definition.attribute_dictionary(BSDD::Settings.ifc_version)
-                next unless ifc_dict
-
-                pset_dict = ifc_dict.attribute_dictionary(propertyset_name, true)
-                property_dict = pset_dict.attribute_dictionary(property_name, true)
-                pset_dict.set_attribute property_name, 'is_hidden', false
-                value_dict = property_dict.attribute_dictionary(value_type, true)
-                property_dict.set_attribute value_type, 'attribute_type', attribute_type
-                property_dict.set_attribute value_type, 'is_hidden', false
-                property_dict.set_attribute value_type, 'value', value
-              end
+              set_property(model, propertyset_name, property_name, value_type, attribute_type, value)
             end
+          end
+        end
+
+        def set_property(model, propertyset_name, property_name, value_type, attribute_type, value)
+          model.selection.each do |entity|
+            next unless entity.class.method_defined?(:definition)
+
+            definition = entity.definition
+            ifc_dict = definition.attribute_dictionary(BSDD::Settings.ifc_version)
+            next unless ifc_dict
+
+            pset_dict = ifc_dict.attribute_dictionary(propertyset_name, true)
+            property_dict = pset_dict.attribute_dictionary(property_name, true)
+            pset_dict.set_attribute property_name, 'is_hidden', false
+            value_dict = property_dict.attribute_dictionary(value_type, true)
+            property_dict.set_attribute value_type, 'attribute_type', attribute_type
+            property_dict.set_attribute value_type, 'is_hidden', false
+            property_dict.set_attribute value_type, 'value', value
+          end
+        end
+
+        def set_attribute(model, property_name, value_type, attribute_type, value)
+          model.selection.each do |entity|
+            next unless entity.class.method_defined?(:definition)
+
+            definition = entity.definition
+            ifc_dict = definition.attribute_dictionary(BSDD::Settings.ifc_version)
+            next unless ifc_dict
+
+            property_dict = ifc_dict.attribute_dictionary(property_name)
+            next unless property_dict
+
+            value_dict = property_dict.attribute_dictionary(value_type, true)
+            property_dict.set_attribute value_type, 'attribute_type', attribute_type
+            property_dict.set_attribute value_type, 'value', value
           end
         end
 

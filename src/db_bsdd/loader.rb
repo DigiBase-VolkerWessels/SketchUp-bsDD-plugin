@@ -91,8 +91,8 @@ module DigiBase
     end
     btn_bsdd_window.small_icon = File.join(PLUGIN_PATH_IMAGE, 'bsdd' + ICON_TYPE)
     btn_bsdd_window.large_icon = File.join(PLUGIN_PATH_IMAGE, 'bsdd' + ICON_TYPE)
-    btn_bsdd_window.tooltip = 'search bSDD'
-    btn_bsdd_window.status_bar_text = 'search bSDD and classify objects'
+    btn_bsdd_window.tooltip = 'Search bSDD'
+    btn_bsdd_window.status_bar_text = 'Search bSDD and classify objects'
 
     # Open settings window
     btn_settings_window = UI::Command.new('bSDD Classifier settings') do
