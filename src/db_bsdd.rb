@@ -34,7 +34,7 @@ module DigiBase
     unless file_loaded?(__FILE__)
 
       # Version and release information.
-      VERSION = '2.1.1'
+      VERSION = '2.2.0'
 
       if Sketchup.version_number > 1_700_000_000
         PLUGIN_PATH       = File.join(PLUGIN_ROOT_PATH, 'db_bsdd')
