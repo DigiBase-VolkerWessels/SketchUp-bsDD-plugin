@@ -184,107 +184,123 @@
       setClassification(data.id, true)
     });
 
-    function getDomain(domainNamespaceUri) {
-      $.ajax({
-        url: bsddEnvironment[environment].bsddDomainUrl,
-        data: { namespaceUri: domainNamespaceUri },
-        statusCode: {
-          404: function (responseObject, textStatus, jqXHR) {
-            // No content found (404)
-            // This code will be executed if the server returns a 404 response
-            console.log('No content found (404)');
-          },
-          503: function (responseObject, textStatus, errorThrown) {
-            // Service Unavailable (503)
-            // This code will be executed if the server returns a 503 response
-            console.log('Service Unavailable (503)');
-          }
-        }
-      })
-        .done(function (domains) {
-          if (domains.length > 0) {
-            var domain = domains[0];
-            return domain;
-          }
-          console.log('No domain found');
-        })
-        .fail(function (jqXHR, textStatus) {
-          console.log('Something went wrong: ' + textStatus);
-          console.log("Unable to find domain:" + domainNamespaceUri)
-        });
-    }
-
     function addClassification(namespaceUri, classification, classificationName = null, relationType = null, toplevel = false) {
       var description;
       var classificationUriParts = namespaceUri.split("/");
-      var domainName = getDomainName(namespaceUri, classification);
+      if (classification !== null && classification !== undefined) {
+        var domainNamespaceUri = classification.domainNamespaceUri;
+        if (domainNamespaceUri !== undefined) {
+          $.ajax({
+            url: bsddEnvironment[environment].bsddDomainUrl,
+            data: { namespaceUri: domainNamespaceUri },
+            async: false, // TODO!
+            statusCode: {
+              404: function (responseObject, textStatus, jqXHR) {
+                // No content found (404)
+                // This code will be executed if the server returns a 404 response
+                console.log('No content found (404)');
+              },
+              503: function (responseObject, textStatus, errorThrown) {
+                // Service Unavailable (503)
+                // This code will be executed if the server returns a 503 response
+                console.log('Service Unavailable (503)');
+              }
+            },
+            success: function (domains) {
+              console.log('classification found');
+              if (domains.length > 0) {
+                console.log(domains[0].name);
+                var domainName = domains[0].name;
+                classificationName = getClassificationName(namespaceUri, classification, classificationName);
 
-      classificationName = getClassificationName(namespaceUri, classification, classificationName);
+                if (toplevel === true) {
+                  $('#name').val(classificationName);
+                }
 
-      if (toplevel === true) {
-        $('#name').val(classificationName);
-      }
+                var classificationContainerId = getIdString([domainName, classificationName]);
+                if ($('#' + classificationContainerId).length === 0) {
 
-      var classificationContainerId = getIdString([domainName, classificationName]);
-      if ($('#' + classificationContainerId).length === 0) {
+                  classificationLabel = $('<label for="name" class="col-3 col-form-label">')
+                    .html(domainName);
 
-        classificationLabel = $('<label for="name" class="col-3 col-form-label">')
-          .html(domainName);
+                  classificationContainer = $('<div>')
+                    .addClass('form-group row section')
+                    .append(classificationLabel)
+                    .prop('id', classificationContainerId);
+                  var inputContainer = $('<div>');
+                  inputContainer.addClass('row col-9');
+                  if (classification !== null && classification !== undefined && classification.domainNamespaceUri !== undefined) {
+                    var inputHidden = $('<input>');
+                    inputHidden.prop('name', 'domain___' + domainName + '___' + classificationName);
+                    inputHidden.prop('type', 'hidden');
+                    inputHidden.val(classification.domainNamespaceUri);
+                    inputContainer.append(inputHidden);
+                  }
+                  classificationContainer.append(inputContainer);
 
-        classificationContainer = $('<div>')
-          .addClass('form-group row section')
-          .append(classificationLabel)
-          .prop('id', classificationContainerId);
-        var inputContainer = $('<div>');
-        inputContainer.addClass('row col-9');
-        if (classification !== null && classification !== undefined && classification.domainNamespaceUri !== undefined) {
-          var inputHidden = $('<input>');
-          inputHidden.prop('name', 'domain___' + domainName + '___' + classificationName);
-          inputHidden.prop('type', 'hidden');
-          inputHidden.val(classification.domainNamespaceUri);
-          inputContainer.append(inputHidden);
-        }
-        classificationContainer.append(inputContainer);
+                  var input = $('<input>');
+                  input.addClass('form-control');
+                  if (recursive_setting === true) {
+                    input.addClass('highlight');
+                  }
+                  input.prop('name', 'classification___' + domainName + '___' + classificationName);
+                  if (classification !== null && classification !== undefined) {
+                    if (classification.definition !== undefined) {
+                      input.prop('title', classification.definition);
+                    }
+                  }
+                  input.prop('readonly', true);
+                  input.prop('type', 'text');
+                  input.val(classificationName);
+                  inputContainer.append(input);
 
-        var input = $('<input>');
-        input.addClass('form-control');
-        if (recursive_setting === true) {
-          input.addClass('highlight');
-        }
-        input.prop('name', 'classification___' + domainName + '___' + classificationName);
-        if (classification !== null && classification !== undefined) {
-          if (classification.definition !== undefined) {
-            input.prop('title', classification.definition);
-          }
-        }
-        input.prop('readonly', true);
-        input.prop('type', 'text');
-        input.val(classificationName);
-        inputContainer.append(input);
+                  $('#ClassificationsContent').append(classificationContainer);
 
-        $('#ClassificationsContent').append(classificationContainer);
+                  if (domainName === ifc_domain) {
+                    if (!ifcType) {
+                      ifcType = true;
+                      classificationLabel.append($('<img src="../images/ifc.svg" style="float:right;margin" title="IFC classification: Object IFC entity type is replaced by this IFC entity">'));
+                      $('#ifcType').val(classificationName);
+                    } else {
+                      classificationLabel.append($('<img src="../images/ifc.svg" style="filter:grayscale(100%);filter:brightness(1000%);filter:contrast(10%);float:right" title="Additional IFC classification: NOT added as Sketchup IFC entity type">'))
+                    }
+                  }
 
-        if (domainName === ifc_domain) {
-          if (!ifcType) {
-            ifcType = true;
-            classificationLabel.append($('<img src="../images/ifc.svg" style="float:right;margin" title="IFC classification: Object IFC entity type is replaced by this IFC entity">'));
-            $('#ifcType').val(classificationName);
-          } else {
-            classificationLabel.append($('<img src="../images/ifc.svg" style="filter:grayscale(100%);filter:brightness(1000%);filter:contrast(10%);float:right" title="Additional IFC classification: NOT added as Sketchup IFC entity type">'))
-          }
-        }
-
-        if (relationType === 'HasMaterial') {
-          if (!material) {
-            material = true;
-            classificationLabel.append($('<img src="../images/material.svg" style="float:right;margin" title="Material classification: in addition to being added as a classification, it is also added as a material">'));
-            $('#material').val(classificationName);
-          } else {
-            classificationLabel.append($('<img src="../images/material.svg" style="filter:grayscale(100%);filter:brightness(1000%);filter:contrast(10%);float:right" title="Additional material classification: NOT added as Sketchup material">'))
-          }
+                  if (relationType === 'HasMaterial') {
+                    if (!material) {
+                      material = true;
+                      classificationLabel.append($('<img src="../images/material.svg" style="float:right;margin" title="Material classification: in addition to being added as a classification, it is also added as a material">'));
+                      $('#material').val(classificationName);
+                    } else {
+                      classificationLabel.append($('<img src="../images/material.svg" style="filter:grayscale(100%);filter:brightness(1000%);filter:contrast(10%);float:right" title="Additional material classification: NOT added as Sketchup material">'))
+                    }
+                  }
+                }
+              }
+            },
+            error: function (jqXHR, exception) {
+              var msg = '';
+              if (jqXHR.status === 0) {
+                msg = 'Not connect.\n Verify Network.';
+              } else if (jqXHR.status == 404) {
+                msg = 'Requested page not found. [404]';
+              } else if (jqXHR.status == 500) {
+                msg = 'Internal Server Error [500].';
+              } else if (exception === 'parsererror') {
+                msg = 'Requested JSON parse failed.';
+              } else if (exception === 'timeout') {
+                msg = 'Time out error.';
+              } else if (exception === 'abort') {
+                msg = 'Ajax request aborted.';
+              } else {
+                msg = 'Uncaught Error.\n' + jqXHR.responseText;
+              }
+            }
+          })
         }
       }
     }
+
 
     // classificationName is added as backup classification name in case url is not valid
     function setClassification(namespaceUri, expand = false, classificationName = null, relationType = null) {
@@ -447,41 +463,6 @@
         }
       }
       return classificationName;
-    }
-
-    function getDomainName(namespaceUri, classification) {
-      if (classification !== null && classification !== undefined) {
-        var domainNamespaceUri = classification.domainNamespaceUri;
-        if (domainNamespaceUri !== undefined) {
-          $.ajax({
-            url: bsddEnvironment[environment].bsddDomainUrl,
-            data: { namespaceUri: domainNamespaceUri },
-            async: false, // TODO!
-            statusCode: {
-              404: function (responseObject, textStatus, jqXHR) {
-                // No content found (404)
-                // This code will be executed if the server returns a 404 response
-                console.log('No content found (404)');
-              },
-              503: function (responseObject, textStatus, errorThrown) {
-                // Service Unavailable (503)
-                // This code will be executed if the server returns a 503 response
-                console.log('Service Unavailable (503)');
-              }
-            }
-          })
-            .done(function (domains) {
-              if (domains.length > 0) {
-                return domains[0].name;
-              }
-            })
-            .fail(function (jqXHR, textStatus) {
-              console.log('Something went wrong: ' + textStatus);
-              console.log("Unable to find domain:" + domainNamespaceUri)
-            });
-        }
-      }
-      return namespaceUri.split("/")[5];
     }
 
     function getIdString(idStringParts) {

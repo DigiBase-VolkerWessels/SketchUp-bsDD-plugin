@@ -37,7 +37,7 @@ module DigiBase
       #
       # @param file_path [String] file path
       # @param token [String] OAuth Access Token
-      def download(file_path, token)
+      def download(file_path, domain_details, token)
         header = {
           'Content-Type': 'multipart/form-data', # 'application/x-www-form-urlencoded',#'application/json',#
           'Authorization': 'Bearer ' + token
@@ -53,15 +53,36 @@ module DigiBase
         http.use_ssl = true
         request = Net::HTTP::Post.new(uri_full, header)
         response = http.request(request)
-        write_skc(file_path, response.body) if response.is_a?(Net::HTTPSuccess)
+        write_skc(file_path, response.body, domain_details) if response.is_a?(Net::HTTPSuccess)
+      end
+      
+      # Get domain details
+      #
+      # @param token [String] OAuth Access Token
+      def domain_details(token)
+        header = {
+          'Content-Type': 'multipart/form-data', # 'application/x-www-form-urlencoded',#'application/json',#
+          'Authorization': 'Bearer ' + token
+        }
+        body = {
+          'namespaceUri' => @uri
+        }
+        params = URI.encode_www_form(body)
+        uri_full = URI.parse(Settings.bsdd_api['domain'] + '?' + params)
+        http = Net::HTTP.new(uri_full.host, uri_full.port)
+        http.use_ssl = true
+        request = Net::HTTP::Get.new(uri_full, header)
+        response = http.request(request)
+        return JSON.parse(response.body).first if response.is_a?(Net::HTTPSuccess)
       end
       
       # Create sketchup skc file from xsd
       #
       # @param file_path [String] file path
       # @param xsd [String] XSD data
-      def write_skc(file_path, xsd)
-        schema_path = File.join('Schemas', @domain_name)
+      def write_skc(file_path, xsd, domain_details)
+        domain_details.default = ""
+        schema_path = File.join('Schemas', @domain_name + '.xsd')
         BimTools::Zip::OutputStream.open(file_path) do |zos|
           zos.put_next_entry(schema_path)
           zos.puts xsd
@@ -78,13 +99,13 @@ module DigiBase
           zos.puts <<-DOC
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <documentProperties xmlns="http://www.sketchup.com/schemas/1.0/documentproperties" xmlns:dp="http://www.sketchup.com/schemas/1.0/documentproperties" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sketchup.com/schemas/1.0/documentproperties http://www.sketchup.com/schemas/1.0/documentproperties.xsd">
-  <dp:title>#{@domain_name}</dp:title>
+  <dp:title>#{domain_details['name']}</dp:title>
   <dp:description>Demo definitie</dp:description>
-  <dp:creator></dp:creator>
+  <dp:creator>#{domain_details['organizationNameOwner']}</dp:creator>
   <dp:keywords></dp:keywords>
   <dp:lastModifiedBy></dp:lastModifiedBy>
-  <dp:revision>1</dp:revision>
-  <dp:created>2022-02-03T14:28:00</dp:created>
+  <dp:revision>#{domain_details['version']}</dp:revision>
+  <dp:created>#{domain_details['releaseDate']}</dp:created>
   <dp:modified>2022-02-03T14:28:00</dp:modified>
   <dp:thumbnail></dp:thumbnail>
   <dp:generator dp:name="Classification" dp:version="1"/>
@@ -108,10 +129,10 @@ module DigiBase
           log_info("Classification already loaded:\r\n'#{@domain_name}'")
         else
           file_path = File.join(PLUGIN_PATH_CLASSIFICATIONS, @domain_name + '.skc')
-          if classifications.load_schema(file_path)
-            log_info("Classification loaded from disk:\r\n'#{@domain_name}'")
-          elsif token = BSDD.authentication.token
-            download(file_path, token)
+          if token = BSDD.authentication.token
+            domain_details = domain_details(token)
+            set_classifiction_details(domain_details)
+            download(file_path, domain_details, token)
             if classifications.load_schema(file_path)
               log_info("Classification loaded from bSDD:\r\n'#{@domain_name}'")
             else
@@ -127,6 +148,18 @@ module DigiBase
       def log_info(message)
         puts message
         UI::Notification.new(BSDD_EXTENSION, message).show
+      end
+
+      def set_classifiction_details(domain_details)
+        su_model = Sketchup.active_model
+        su_model.set_attribute('IfcManager', 'description', '')
+        project_data = su_model.attribute_dictionaries['IfcManager']
+        project_data.set_attribute('Classifications', 'description', '')
+        classifications = project_data.attribute_dictionaries['Classifications']
+        classifications.set_attribute(domain_details['name'], 'location', domain_details['namespaceUri'])
+        classifications.set_attribute(domain_details['name'], 'source', domain_details['organizationNameOwner'])
+        classifications.set_attribute(domain_details['name'], 'edition', domain_details['version'])
+        classifications.set_attribute(domain_details['name'], 'editiondate', domain_details['releaseDate'])
       end
     end
   end
